@@ -14,5 +14,6 @@ int addCopyNode(List **list, int inodeNum, char *path, int inodeNumOriginal);
 INode * searchForNode(List *list, int inodeNum);
 void printNodes(List *list);
 int deleteNode(List **list, int inodeNum);
+INode * normalDelete(List **list, int inodeNum);
 
 #endif

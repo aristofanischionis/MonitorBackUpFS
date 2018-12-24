@@ -75,7 +75,7 @@ int addCopyNode(List **list, int inodeNum, char *path, int inodeNumOriginal) {
     return 0;
 }
 
-// Find if an inode with the given path exists and return it else return null
+// Find if an inode exists and return it else return null
 INode * searchForNode(List *list, int inodeNum) {
     // if list is empty return null
     if (list->head == NULL) {
@@ -105,43 +105,50 @@ void printNodes(List *list) {
 }
 
 
-// Delete given inode (path) and all copies pointing to this inode
+// Delete given inode and all copies pointing to this inode
 int deleteNode(List **list, int inodeNum) {
     INode *node = searchForNode(*list, inodeNum);
-
     // check if given node exists
     if (node == NULL) {
         return 1;
     }
 
     // firstly delete all copies directed to given inode
-    INode *current = list->head;
+    INode *current = (*list)->head;
 
     while (current != NULL) {
         if (current->copy->inodeNum == inodeNum) {
-            /* code */
+            if (current->inodeNum == (*list)->head->inodeNum) {
+                INode *n = (*list)->head;
+                (*list)->head = n->next;
+                free(n);
+                current = (*list)->head;
+            } else {
+                current = normalDelete(list, inodeNum);
+            }
+        } else {
+            current = current->next;
         }
-        current = current->next;
     }
 
     // delete the node
     // when node to be deleted is the head node
     if ((*list)->head->inodeNum == inodeNum) {
-        //if there is only one node in the list make list head point to null and free node
-        if ((*list)->head->next == NULL) {
-            INode *n = (*list)->head;
-            (*list)->head = NULL;
-            free(n);
-            return 0;
-        }
-
         INode *n = (*list)->head;
         (*list)->head = n->next;
         free(n);
-
         return 0;
     }
 
+    normalDelete(list, inodeNum);
+
+    return 0;
+
+}
+
+// normal deletion process (delete a node in the middle of the list) that returns the
+// node next of the deleted one
+INode * normalDelete(List **list, int inodeNum) {
     // when not head node, follow the normal deletion process:
     // find the previous node
     INode *prev = (*list)->head;
@@ -155,13 +162,11 @@ int deleteNode(List **list, int inodeNum) {
     INode *n = prev->next;        //the node to be deleted
     //check if node really exists in list (because prev pointer might have reached end of list)
     if (prev->next == NULL) {
-        return 1;
+        return NULL;
     }
 
     //remove node from list and make previous node point to the next one of the deleted
     prev->next = n->next;
     free(n);
-
-    return 0;
-
+    return prev->next;
 }
