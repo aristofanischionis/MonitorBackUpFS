@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "poll.h": "c",
+        "tree.h": "c",
+        "stdio.h": "c"
+    }
+}
