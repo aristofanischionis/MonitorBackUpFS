@@ -5,8 +5,8 @@
 #include <sys/types.h>
 
 typedef struct INode {
-    char *path;
-    struct timespec changeDate;
+    int inodeNum;
+    time_t modDate;
     off_t size;
     // list with names
     int nameCount;

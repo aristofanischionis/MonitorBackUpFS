@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "list.h"
 
 int main(int argc, char const *argv[]) {
@@ -5,5 +6,8 @@ int main(int argc, char const *argv[]) {
     addSourceNode(&list, "list.c");
     addSourceNode(&list, "useless.c");
     printNodes(list);
+    // deleteNode(&list, "list.c");
+    // printf("...\n");
+    // printNodes(list);
     return 0;
 }
