@@ -8,7 +8,7 @@
 #include <sys/types.h>
 
 //The fixed size of the event buffer:
-#define EVENT_SIZE  ( sizeof (struct inotify_event) )
+#define EVENT_SIZE  (sizeof (struct inotify_event))
 
 //The size of the read buffer: estimate 1024 events with 16 bytes per name over and above the fixed size above
 #define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
@@ -17,18 +17,18 @@ void fail(const char *message) {
 	perror(message);
 	exit(EXIT_FAILURE);
 }
-const char * target_type(const struct inotify_event *event) {
+const char * targetType(const struct inotify_event *event) {
 	if( event->len == 0 )
 		return "";
 	else
 		return event->mask & IN_ISDIR ? "directory" : "file";
 }
 
-const char * target_name(const struct inotify_event *event) {
+const char * targetName(const struct inotify_event *event) {
 	return event->len > 0 ? event->name : "";
 }
 
-const char * event_name(const struct inotify_event *event) {
+const char * eventName(const struct inotify_event *event) {
 	if (event->mask & IN_ACCESS)
 		return "access";
 	else if (event->mask & IN_ATTRIB)
@@ -63,8 +63,7 @@ const char * event_name(const struct inotify_event *event) {
           argv is the list of watched directories.
           Entry 0 of wd and argv is unused. */
 
-static void handle_events(int fd, int *wd, int argc, char *argv[])
-{
+static void handleEvents(int fd, int *wd, int argc, char *argv[]) {
     /* Some systems cannot read integer variables if they are not
               properly aligned. On other systems, incorrect alignment may
               decrease performance. Hence, the buffer used for reading from
@@ -80,14 +79,13 @@ static void handle_events(int fd, int *wd, int argc, char *argv[])
 
     /* Loop while events can be read from inotify file descriptor. */
 
-    for (;;)
-    {
+    for (;;) {
 
         /* Read some events. */
 
         len = read(fd, buf, sizeof buf);
         if (len == -1 && errno != EAGAIN) fail("read");
-        
+
         /* If the nonblocking read() found no events to read, then
                   it returns -1 with errno set to EAGAIN. In that case,
                   we exit the loop. */
@@ -97,41 +95,36 @@ static void handle_events(int fd, int *wd, int argc, char *argv[])
 
         /* Loop over all events in the buffer */
 
-        for (ptr = buf; ptr < buf + len;
-             ptr += sizeof(struct inotify_event) + event->len)
-        {
+        for (ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len) {
 
             event = (const struct inotify_event *)ptr;
 
             /* Print the name of the watched directory */
 
-            for (i = 1; i < argc; ++i)
-            {
-                if (wd[i] == event->wd)
-                {
+            for (i = 1; i < argc; ++i) {
+                if (wd[i] == event->wd) {
                     printf("%s\n", argv[i]);
                     break;
                 }
             }
             // event is fully received, process
-			printf("WD:%i %s %s %s COOKIE=%u\n", 
-				event->wd, event_name(event), 
-				target_type(event), target_name(event), event->cookie);
+			printf("WD:%i %s %s %s COOKIE=%u\n",
+				event->wd, eventName(event),
+				targetType(event), targetName(event), event->cookie);
 
         }
     }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     char buf;
-    int fd, i, poll_num, watched = 0;
+    int fd, i, pollNum, watched = 0;
     int *wd;
     nfds_t nfds;
     struct pollfd fds[2];
 
     if (argc < 2) fail("Usage: ./mirr PATH [PATH ...]\n");
-    
+
     printf("Press ENTER key to terminate.\n");
 
     /* Create the file descriptor for accessing the inotify API */
@@ -148,12 +141,10 @@ int main(int argc, char *argv[])
               - file was opened
               - file was closed */
 
-    for (i = 1; i < argc; i++)
-    {
+    for (i = 1; i < argc; i++) {
         wd[i] = inotify_add_watch(fd, argv[i], IN_ALL_EVENTS);
         watched++;
-        if (wd[i] == -1)
-        {
+        if (wd[i] == -1) {
             fprintf(stderr, "Cannot watch '%s'\n", argv[i]);
             perror("inotify_add_watch");
             watched--;
@@ -177,21 +168,18 @@ int main(int argc, char *argv[])
     /* Wait for events and/or terminal input */
 
     printf("Listening for events.\n");
-    while (1)
-    {
-        poll_num = poll(fds, nfds, -1);
-        if (poll_num == -1)
+    while (1) {
+        pollNum = poll(fds, nfds, -1);
+        if (pollNum == -1)
         {
             if (errno == EINTR)
                 continue;
             fail("poll");
         }
 
-        if (poll_num > 0)
-        {
+        if (pollNum > 0) {
 
-            if (fds[0].revents & POLLIN)
-            {
+            if (fds[0].revents & POLLIN) {
 
                 /* Console input is available. Empty stdin and quit */
 
@@ -200,12 +188,11 @@ int main(int argc, char *argv[])
                 break;
             }
 
-            if (fds[1].revents & POLLIN)
-            {
+            if (fds[1].revents & POLLIN) {
 
                 /* Inotify events are available */
 
-                handle_events(fd, wd, argc, argv);
+                handleEvents(fd, wd, argc, argv);
             }
         }
     }
