@@ -86,9 +86,7 @@ void deleteNodeKids(myTree* node){
     if(node->kid != NULL){
         deleteNodeKids(node->kid);
     }
-    else {
-        free(node);
-    }
+    free(node);
 }
 
 myTree* removeNode(myTree* root, myTree* node){
@@ -98,6 +96,8 @@ myTree* removeNode(myTree* root, myTree* node){
         printf("Couldn't find the node to remove\n");
         return NULL;
     }
+    // delete its kids
+    deleteNodeKids(res);
     // delete the node under review
     // find the previous node
     myTree *prev = root;
@@ -116,8 +116,7 @@ myTree* removeNode(myTree* root, myTree* node){
 
     //remove node from list and make previous node point to the next one of the deleted
     prev->next = res->next;
-    //
-    deleteNodeKids(res);
+    
 
     // free(res);
 }
@@ -134,16 +133,14 @@ void printTree(myTree* root, int space){
     // Increase distance between levels 
     space += COUNT; 
   
-    // Process right child first 
-    printTree(root->kid, space); 
+    if(root->kid) printTree(root->kid, space); 
   
     // Print current node after space 
     // count 
     printf("\n"); 
     for (int i = COUNT; i < space; i++) 
-        printf(" "); 
+        printf("-"); 
     printf("%d\n", root->data.myData->num); 
   
-    // Process left child 
-    printTree(root->next, space); 
+    if(root->next) printTree(root->next, space); 
 }
