@@ -3,12 +3,13 @@
 
 #include <time.h>
 #include <sys/types.h>
+#include "namelist.h"
 
 typedef struct INode {
     int inodeNum;
     time_t modDate;
     off_t size;
-    // list with names
+    NameList *names;
     int nameCount;
     struct INode *copy;    // only for files in source
     struct INode *next;

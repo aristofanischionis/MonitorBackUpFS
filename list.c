@@ -25,7 +25,7 @@ int addSourceNode(List **list, char *path) {
     // check if given node exists
     if (node != NULL) {
         // if inode already exists then add path name to its nameList and increase counter
-
+        addName(&node->names, path);
         node->nameCount++;
         return 1;
     }
@@ -34,7 +34,9 @@ int addSourceNode(List **list, char *path) {
     newNode->inodeNum = (int) buf.st_ino;
     newNode->modDate = buf.st_mtime;
     newNode->size = buf.st_size;
+    newNode->names = initializeNameList();
     newNode->nameCount = (int) buf.st_nlink;
+    newNode->copy = NULL;
     newNode->next = (*list)->head;
     // Change head pointer as new node is added at the beginning
     (*list)->head = newNode;
@@ -55,7 +57,7 @@ int addCopyNode(List **list, int inodeNum, char *path, int inodeNumOriginal) {
     // check if given node exists
     if (node != NULL) {
         // if inode already exists then add path name to its nameList and increase counter
-
+        addName(&node->names, path);
         node->nameCount++;
         return 1;
     }
@@ -66,6 +68,7 @@ int addCopyNode(List **list, int inodeNum, char *path, int inodeNumOriginal) {
     newNode->inodeNum = (int) buf.st_ino;
     newNode->modDate = originalNode->modDate;
     newNode->size = originalNode->size;
+    newNode->names = initializeNameList();
     newNode->nameCount = originalNode->nameCount;
     newNode->copy = originalNode;
     newNode->next = NULL;
@@ -93,7 +96,6 @@ INode * searchForNode(List *list, int inodeNum) {
     return NULL;
 }
 
-
 // Print all nodes
 void printNodes(List *list) {
     INode *current = list->head;
@@ -104,7 +106,6 @@ void printNodes(List *list) {
     }
 }
 
-
 // Delete given inode and all copies pointing to this inode
 int deleteNode(List **list, int inodeNum) {
     INode *node = searchForNode(*list, inodeNum);
@@ -112,12 +113,14 @@ int deleteNode(List **list, int inodeNum) {
     if (node == NULL) {
         return 1;
     }
-
     // firstly delete all copies directed to given inode
     INode *current = (*list)->head;
 
     while (current != NULL) {
-        if (current->copy->inodeNum == inodeNum) {
+        if (current->copy != NULL && current->copy->inodeNum == inodeNum) {
+            // delete name list first
+            deleteNameList(&current->names);
+
             if (current->inodeNum == (*list)->head->inodeNum) {
                 INode *n = (*list)->head;
                 (*list)->head = n->next;
