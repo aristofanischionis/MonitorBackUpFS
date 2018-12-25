@@ -34,5 +34,8 @@ int main(void){
     myTree* res = search(root, data4);
     printf("........%s,,,,,,,,,%d\n", res->data.name, res->data.myData->num);
     fflush(stdout);
+    printTree(root, 0);
+    removeNode(root, kid); // if I try removing kids it  doesn't work...
+    printTree(root, 0);
     return 0;
 }

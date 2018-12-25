@@ -23,3 +23,5 @@ myTree* addNext(myTree* node, Data data);
 myTree* addKid(myTree* node, Data data);
 myTree *finderKids(myTree *toCheck, char *name);
 myTree* search(myTree* root, Data data);
+myTree* removeNode(myTree* root, myTree* node);
+void printTree(myTree* root, int space);
