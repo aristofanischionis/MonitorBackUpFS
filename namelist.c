@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "namelist.h"
+#include "Headerfiles/namelist.h"
 
 // Allocate memory for list of names struct
 NameList * initializeNameList(void) {
