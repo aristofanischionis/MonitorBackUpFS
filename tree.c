@@ -4,52 +4,63 @@
 #include "Headerfiles/tree.h"
 #define COUNT 10
 
-myTree *newNode(Data data)
-{
-    myTree *node = (myTree *)malloc(sizeof(myTree));
+Tree* initializeTree(void) {
+    Tree *tree = NULL;
+    tree = malloc(sizeof(Tree));
+    tree->root = NULL;
 
-    if (node)
-    {
+    return tree;
+}
+
+// Initialize a new tree node with the given data
+TreeNode* newNode(Data data) {
+    TreeNode *node = (TreeNode *)malloc(sizeof(TreeNode));
+
+    if (node) {
         node->data = data;
-        node->next = NULL;
+        node->sibling = NULL;
         node->kid = NULL;
-        return (node);
+        return node;
     }
     perror("Something went wrong while allocating newNode\n");
     exit(EXIT_FAILURE);
 }
 
-myTree *addNext(myTree *node, Data data)
-{
-    if (node == NULL)
+// Add a sibling to the tree level of the given node
+TreeNode* addSibling(TreeNode *node, Data data) {
+    if (node == NULL) {
         return NULL;
-    while (node->next != NULL)
-        node = node->next;
+    }
+    while (node->sibling != NULL) {
+        node = node->sibling;
+    }
 
-    return (node->next = newNode(data));
+    return (node->sibling = newNode(data));
 }
 
-myTree *addKid(myTree *node, Data data)
-{
-    if (node == NULL)
+// Add a kid to the given node
+TreeNode* addKid(TreeNode *node, Data data) {
+    if (node == NULL) {
         return NULL;
-    // I already have a kid so I will add him a next
-    if (node->kid != NULL)
-        return addNext(node->kid, data);
-    else
+    }
+    // if there is already a kid, add it as a sibling to it
+    // else add it as the first kid
+    if (node->kid != NULL) {
+        return addSibling(node->kid, data);
+    } else {
         return (node->kid = newNode(data));
+    }
 }
 
-myTree *finderKids(myTree *toCheck, char *name){
+TreeNode* finderKids(TreeNode *toCheck, char *name) {
     // DFS
-    if((toCheck == NULL) || (!strcmp(toCheck->data.name, name))){
+    if ((toCheck == NULL) || (!strcmp(toCheck->data.name, name))) {
         printf("toCheck is null or name is found");
         return toCheck;
     }
     toCheck = toCheck->kid;
-    while(toCheck != NULL){
-        if (!strcmp(toCheck->data.name, name))
-        {
+    while (toCheck != NULL) {
+        if (!strcmp(toCheck->data.name, name)) {
             //found it
             return toCheck;
         }
@@ -58,41 +69,42 @@ myTree *finderKids(myTree *toCheck, char *name){
     return NULL;
 }
 
-myTree *search(myTree *root, Data data)
-{
+TreeNode* search(TreeNode *root, Data data) {
     // base case
-    if((root == NULL) || (!strcmp(root->data.name, data.name))){
+    if ((root == NULL) || (!strcmp(root->data.name, data.name))) {
         printf("root is null or name is found");
         return root;
     }
-    myTree *res = (myTree*) malloc(sizeof(myTree));
-    
-    while(root != NULL){
+    TreeNode *res = (TreeNode*) malloc(sizeof(TreeNode));
+
+    while(root != NULL) {
         // search its children
         res = finderKids(root, data.name);
-        if(res != NULL){
+        if (res != NULL) {
             return res;
         }
         root = root->next;
     }
-    
+
     printf("I couldn't find %s\n", root->data.name);
     free(res);
     return NULL;
 }
 
-void deleteNodeKids(myTree* node){
+// Delete kids of a given node (and their kids)
+// exei provlima mallon !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void deleteNodeKids(TreeNode* node) {
 
-    if(node->kid != NULL){
+    if (node->kid != NULL) {
         deleteNodeKids(node->kid);
     }
     free(node);
 }
 
-myTree* removeNode(myTree* root, myTree* node){
-    myTree* res;
+TreeNode* removeNode(TreeNode* root, TreeNode* node) {
+    TreeNode* res;
     res = search(root, node->data);
-    if(res == NULL){
+    if (res == NULL) {
         printf("Couldn't find the node to remove\n");
         return NULL;
     }
@@ -100,7 +112,7 @@ myTree* removeNode(myTree* root, myTree* node){
     deleteNodeKids(res);
     // delete the node under review
     // find the previous node
-    myTree *prev = root;
+    TreeNode *prev = root;
     while (prev->next != NULL) {
         if (!strcmp(prev->next->data.name, node->data.name) ) {
             break;
@@ -116,31 +128,31 @@ myTree* removeNode(myTree* root, myTree* node){
 
     //remove node from list and make previous node point to the next one of the deleted
     prev->next = res->next;
-    
+
 
     // free(res);
 }
 
-myTree* ordering(myTree* node){
+TreeNode* ordering(TreeNode* node) {
     // order nodes according to their names
 }
 
-void printTree(myTree* root, int space){
-    // Base case 
-    if (root == NULL) 
-        return; 
-  
-    // Increase distance between levels 
-    space += COUNT; 
-  
-    if(root->kid) printTree(root->kid, space); 
-  
-    // Print current node after space 
-    // count 
-    printf("\n"); 
-    for (int i = COUNT; i < space; i++) 
-        printf("-"); 
-    printf("%d\n", root->data.myData->num); 
-  
-    if(root->next) printTree(root->next, space); 
+void printTree(TreeNode* root, int space) {
+    // Base case
+    if (root == NULL)
+        return;
+
+    // Increase distance between levels
+    space += COUNT;
+
+    if(root->kid) printTree(root->kid, space);
+
+    // Print current node after space
+    // count
+    printf("\n");
+    for (int i = COUNT; i < space; i++)
+        printf("-");
+    printf("%d\n", root->data.myData->num);
+
+    if(root->next) printTree(root->next, space);
 }

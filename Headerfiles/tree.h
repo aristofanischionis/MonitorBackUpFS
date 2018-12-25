@@ -1,27 +1,28 @@
 
-struct iNodeData{
+typedef struct  iNodeData{
     int num;
-};
-typedef struct iNodeData iNodeData;
+} iNodeData;
 
-struct Data {
+typedef struct Data {
     char name[30];
     iNodeData *myData;
-};
-typedef struct Data Data;
+} Data;
 
-struct myTree {
+typedef struct  TreeNode {
     Data data;
-    struct myTree *kid;
-    struct myTree *next;
-};
-typedef struct myTree myTree;
+    struct TreeNode *kid;
+    struct TreeNode *sibling;
+} TreeNode;
+
+typedef struct Tree {
+    TreeNode *root;
+} Tree;
 
 // functions
-myTree* newNode(Data data);
-myTree* addNext(myTree* node, Data data);
-myTree* addKid(myTree* node, Data data);
-myTree *finderKids(myTree *toCheck, char *name);
-myTree* search(myTree* root, Data data);
-myTree* removeNode(myTree* root, myTree* node);
-void printTree(myTree* root, int space);
+TreeNode* newNode(Data data);
+TreeNode* addSibling(TreeNode *node, Data data);
+TreeNode* addKid(TreeNode* node, Data data);
+TreeNode* finderKids(TreeNode *toCheck, char *name);
+TreeNode* search(TreeNode* root, Data data);
+TreeNode* removeNode(TreeNode* root, TreeNode* node);
+void printTree(TreeNode* root, int space);

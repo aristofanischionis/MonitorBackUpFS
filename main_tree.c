@@ -25,13 +25,13 @@ int main(void){
     strcpy(data4.name, "myname is 44444");
     data4.myData->num = 5;
 
-    myTree* root = newNode(data);
-    myTree* neighbour = addNext(root, data1);
-    myTree* neighbour1 = addNext(neighbour, data3);
-    myTree* kid = addKid(neighbour, data2);
-    myTree* kid1 = addKid(kid, data4);
+    TreeNode* root = newNode(data);
+    TreeNode* neighbour = addSibling(root, data1);
+    TreeNode* neighbour1 = addSibling(neighbour, data3);
+    TreeNode* kid = addKid(neighbour, data2);
+    TreeNode* kid1 = addKid(kid, data4);
 
-    myTree* res = search(root, data4);
+    TreeNode* res = search(root, data4);
     printf("........%s,,,,,,,,,%d\n", res->data.name, res->data.myData->num);
     fflush(stdout);
     printTree(root, 0);
