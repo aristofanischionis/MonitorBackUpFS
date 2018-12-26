@@ -31,18 +31,19 @@ int main(void){
     Tree *root = initializeTree();
     TreeNode* neighbour = addSiblingSorted(root->root, data);
     TreeNode* neighbour1 = addSiblingSorted(root->root, data1);
-    // TreeNode* neighbour2 = addSiblingSorted(root->root, data2);
+    TreeNode* neighbour2 = addSiblingSorted(root->root, data2);
     TreeNode* kid = addKid(neighbour, data3);
     TreeNode* kid1 = addKid(neighbour, data4);
     TreeNode* kid2 = addKid(neighbour, data5);
     ///////////////////////////////////////////////////////
+    printf("name--> %s\n", root->root->data.name);
     TreeNode* res;
-    // res = search(root, data);
-    // printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
-    // res = search(root, data1);
-    // printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
-    // res = search(root, data2);
-    // printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
+    res = search(root, data);
+    printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
+    res = search(root, data1);
+    printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
+    res = search(root, data2);
+    printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
     res = search(root, data3);
     printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
     res = search(root, data4);

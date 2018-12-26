@@ -30,9 +30,6 @@ TreeNode* newNode(Data data) {
     perror("Something went wrong while allocating newNode\n");
     exit(EXIT_FAILURE);
 }
-static int compareSiblings(const Data a, const Data b) {
-    return strcmp(a.name, b.name);
-}
 
 // Add a sibling to the tree level of the given node
 TreeNode* addSiblingSorted(TreeNode *node, Data data) {
@@ -43,7 +40,8 @@ TreeNode* addSiblingSorted(TreeNode *node, Data data) {
     }
     prev = node;
     // sort from a->z
-    while ((prev->sibling != NULL) && (compareSiblings(prev->data, data) >= 0)) {
+    while (prev->sibling != NULL) {
+        if(strcmp(prev->data.name, data.name) >= 0) break;
         prev = prev->sibling;
     }
     // at prev we now have the prev node
@@ -73,72 +71,90 @@ TreeNode* addKid(TreeNode *node, Data data) {
 ///////////////////////////////////////////////////////////////////////
 
 // function to find out middle element 
-TreeNode* middle(TreeNode* start, TreeNode* last) 
-{ 
-    printf("I am here");
-    if (start == NULL) 
-        return NULL; 
+// TreeNode* middle(TreeNode* start, TreeNode* last) 
+// { 
+//     printf("I am here");
+//     if (start == NULL) 
+//         return NULL; 
   
-    TreeNode* slow = start; 
-    TreeNode* fast = start->kid; 
-    if(fast == NULL){
-        return slow;
-    }
-    while (fast != last) 
-    { 
-        fast = fast->kid; 
-        if (fast != last) 
-        { 
-            slow = slow->kid; 
-            fast = fast->kid; 
-        } 
-    } 
+//     TreeNode* slow = start; 
+//     TreeNode* fast = start->kid; 
+//     if(fast == NULL){
+//         return slow;
+//     }
+//     while (fast != last) 
+//     { 
+//         fast = fast->kid; 
+//         if (fast != last) 
+//         { 
+//             slow = slow->kid; 
+//             fast = fast->kid; 
+//         } 
+//     } 
   
-    return slow; 
-} 
+//     return slow; 
+// } 
   
 // Function for implementing the Binary 
 // Search on linked list 
-TreeNode* binarySearch(TreeNode *head, char* name) 
-{ 
-    TreeNode* start = head; 
-    TreeNode* last = NULL; 
+// TreeNode* binarySearch(TreeNode *head, char* name) 
+// { 
+//     TreeNode* start = head; 
+//     TreeNode* last = NULL; 
   
-    do
-    { 
-        // Find middle 
-        TreeNode* mid = middle(start, last); 
+//     do
+//     { 
+//         // Find middle 
+//         TreeNode* mid = middle(start, last); 
   
-        // If middle is empty 
-        if (mid == NULL) 
-            return NULL; 
+//         // If middle is empty 
+//         if (mid == NULL) 
+//             return NULL; 
   
-        // If name is present at middle 
-        if (!strcmp(mid->data.name, name)) 
-            return mid; 
+//         // If name is present at middle 
+//         if (!strcmp(mid->data.name, name)) 
+//             return mid; 
   
-        // If name is more than mid 
+//         // If name is more than mid 
         
-        else if (strcmp(mid->data.name, name) < 0) 
-            start = mid->kid; 
+//         else if (strcmp(mid->data.name, name) < 0) 
+//             start = mid->kid; 
   
-        // If the name is less than mid. 
-        else
-            last = mid; 
+//         // If the name is less than mid. 
+//         else
+//             last = mid; 
   
-    } while (last == NULL || last->kid != start); 
+//     } while (last == NULL || last->kid != start); 
   
-    // name not present 
-    return NULL; 
-} 
+//     // name not present 
+//     return NULL; 
+// } 
 ///////////////////////////////////////////////////////////////////////
-TreeNode* finderKids(TreeNode *toCheck, char *name) {
+// TreeNode* finderKids(TreeNode *toCheck, char *name) {
+//     // DFS
+//     if ((toCheck == NULL) || (!strcmp(toCheck->data.name, name))) {
+//         return toCheck;
+//     }
+//     if(toCheck->kid == NULL) return NULL;
+//     return binarySearch(toCheck, name);
+//     return NULL;
+// }
+
+TreeNode *finderKids(TreeNode *toCheck, char *name){
     // DFS
-    if ((toCheck == NULL) || (!strcmp(toCheck->data.name, name))) {
+    if((toCheck == NULL) || (!strcmp(toCheck->data.name, name))){
+        printf("toCheck is null or name is found");
         return toCheck;
     }
-    if(toCheck->kid == NULL) return NULL;
-    return binarySearch(toCheck, name);
+    toCheck = toCheck->kid;
+    while(toCheck != NULL){
+        if (!strcmp(toCheck->data.name, name))
+        {
+            //found it
+            return toCheck;
+        }
+        toCheck = toCheck->kid;
+    }
     return NULL;
 }
 
@@ -148,15 +164,17 @@ TreeNode* search(Tree *root, Data data) {
         printf("root is null or name is found");
         return root->root;
     }
-    TreeNode *res = (TreeNode*) malloc(sizeof(TreeNode));
+    TreeNode *res;
+    TreeNode* toCheck;
+    toCheck = root->root;
     // res = root->root;
-    while(root->root != NULL) {
+    while(toCheck != NULL) {
         // search its children
-        res = finderKids(root->root, data.name);
+        res = finderKids(toCheck, data.name);
         if (res != NULL) {
             return res;
         }
-        root->root = root->root->sibling;
+        toCheck = toCheck->sibling;
     }
 
     printf("I couldn't find %s\n", data.name);
@@ -222,4 +240,16 @@ int removeNode(Tree* root, TreeNode* node) {
 //     printf("%d\n", root->root->data.myData->num);
 
 //     if(root->root->sibling) printTree(root->root->sibling, space);
+// }
+
+// void printBranch(TreeNode *node){
+
+//     TreeNode* current = node;
+
+//     if(current->kid != NULL){
+//         printBranch(current->kid);
+//     }
+//     else printf("-->%s\n",current->data.name);
+
+
 // }
