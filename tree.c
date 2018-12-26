@@ -203,6 +203,7 @@ int removeNode(Tree* root, TreeNode* node) {
     // delete the node under review
     // find the previous node
     TreeNode *prev = root->root;
+    TreeNode *parent = NULL;
     while (prev->sibling != NULL) {
         if (!strcmp(prev->sibling->data.name, node->data.name) ) {
             break;
@@ -211,44 +212,38 @@ int removeNode(Tree* root, TreeNode* node) {
         res = finderKids(prev->sibling, node->data.name);
         if (res != NULL) {
             // prev->sibling = res;
-            printf("=========%s\n", res->data.name);
+            parent = prev->sibling;
+            printf("=========%s\n", parent->data.name);
             break;
         }
         
         prev = prev->sibling;
     }
 
-    res = prev->sibling;        //the node to be deleted
+    // res = prev->sibling;        //the node to be deleted
     //check if node really exists in list (because prev pointer might have reached end of list)
-    if (res == NULL) {
-        return 1;
-    }
+    // if (res == NULL) {
+    //     return 1;
+    // }
 
-    //remove node from list and make previous node point to the sibling one of the deleted
-    prev->sibling = res->sibling;
+    if(parent != NULL){
+        if(!strcmp(parent->kid->data.name, res->data.name)){
+            //then it is the first kid
+            // so change it
+            parent->kid = res->sibling;
+        }
+    }
+    else {
+        res = prev->sibling;
+        if (res == NULL) {
+            return 1;
+        }
+        //remove node from list and make previous node point to the sibling one of the deleted
+        prev->sibling = res->sibling;
+    }
     free(res);
     return 0;
 }
-
-// void printTree(Tree* root, int space) {
-//     // Base case
-//     if (root->root == NULL)
-//         return;
-
-//     // Increase distance between levels
-//     space += COUNT;
-
-//     if(root->root->kid) printTree(root->root->kid, space);
-
-//     // Print current node after space
-//     // count
-//     printf("\n");
-//     for (int i = COUNT; i < space; i++)
-//         printf("-");
-//     printf("%d\n", root->root->data.myData->num);
-
-//     if(root->root->sibling) printTree(root->root->sibling, space);
-// }
 
 void printTree(Tree *tree) {
     printBranch(tree->root->kid, tree->root->data.name);
