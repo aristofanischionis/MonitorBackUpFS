@@ -19,10 +19,11 @@ typedef struct Tree {
 } Tree;
 
 // functions
+Tree* initializeTree(void);
 TreeNode* newNode(Data data);
-TreeNode* addSibling(TreeNode *node, Data data);
+TreeNode* addSiblingSorted(TreeNode *node, Data data);
 TreeNode* addKid(TreeNode* node, Data data);
 TreeNode* finderKids(TreeNode *toCheck, char *name);
-TreeNode* search(TreeNode* root, Data data);
-TreeNode* removeNode(TreeNode* root, TreeNode* node);
-void printTree(TreeNode* root, int space);
+TreeNode* search(Tree *root, Data data);
+int removeNode(Tree* root, TreeNode* node);
+// void printTree(Tree* root, int space);
