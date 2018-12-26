@@ -1,4 +1,4 @@
-all: test test1
+all: test test1 test2
 
 test: main_list.c
 	gcc -g main_list.c namelist.c list.c -o test
@@ -6,5 +6,8 @@ test: main_list.c
 test1: main_tree.c
 	gcc -g main_tree.c tree.c -o test1
 
+test2: main_tree2.c
+	gcc -g main_tree2.c tree.c -o test2
+
 clean:
-	rm -f test test1
+	rm -f test test1 test2

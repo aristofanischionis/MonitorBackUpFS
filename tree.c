@@ -4,16 +4,12 @@
 #include "Headerfiles/tree.h"
 #define COUNT 10
 
-Tree* initializeTree(void) {
+// Initiaize tree with the given data as root node
+Tree* initializeTree(Data data) {
     Tree *tree = NULL;
     tree = malloc(sizeof(Tree));
-    // tree->root = NULL;
-    Data rootData;
-    rootData.myData = (iNodeData*)malloc(sizeof(iNodeData));
-    rootData.myData->num = 0;
-    strcpy(rootData.name, "root");
-    tree->root = newNode(rootData);
-    
+    tree->root = newNode(data);
+
     return tree;
 }
 
@@ -143,7 +139,7 @@ TreeNode* addKid(TreeNode *node, Data data) {
 TreeNode *finderKids(TreeNode *toCheck, char *name){
     // DFS
     if((toCheck == NULL) || (!strcmp(toCheck->data.name, name))){
-        printf("toCheck is null or name is found");
+        // printf("toCheck is null or name is found");
         return toCheck;
     }
     toCheck = toCheck->kid;
@@ -153,7 +149,7 @@ TreeNode *finderKids(TreeNode *toCheck, char *name){
             //found it
             return toCheck;
         }
-        toCheck = toCheck->kid;
+        toCheck = toCheck->sibling;
     }
     return NULL;
 }
@@ -161,7 +157,6 @@ TreeNode *finderKids(TreeNode *toCheck, char *name){
 TreeNode* search(Tree *root, Data data) {
     // base case
     if ((root == NULL) || (root->root == NULL) || (!strcmp(root->root->data.name, data.name))) {
-        printf("root is null or name is found");
         return root->root;
     }
     TreeNode *res;
@@ -181,12 +176,13 @@ TreeNode* search(Tree *root, Data data) {
     return NULL;
 }
 
-// Delete kids of a given node (and their kids)
-// exei provlima mallon !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-void deleteNodeKids(TreeNode* node) {
-
-    if (node->kid != NULL) {
-        deleteNodeKids(node->kid);
+void deleteNodeSiblings(TreeNode* node) {
+    if(node == NULL) return;
+    printf("Went through node --> null\n");
+    fflush(stdout);
+    if (node->sibling != NULL) {
+        printf("hi there");
+        deleteNodeSiblings(node->sibling);
     }
     free(node);
 }
@@ -199,7 +195,11 @@ int removeNode(Tree* root, TreeNode* node) {
         return 1;
     }
     // delete its kids
-    deleteNodeKids(res);
+    printf("before %s, %s\n", res->data.name, res->kid->data.name);
+    // delete all of its kids, so all the siblings of its kid
+    deleteNodeSiblings(res->kid);
+    printf("after");
+    fflush(stdout);
     // delete the node under review
     // find the previous node
     TreeNode *prev = root->root;
@@ -207,6 +207,14 @@ int removeNode(Tree* root, TreeNode* node) {
         if (!strcmp(prev->sibling->data.name, node->data.name) ) {
             break;
         }
+        // search its children
+        res = finderKids(prev->sibling, node->data.name);
+        if (res != NULL) {
+            // prev->sibling = res;
+            printf("=========%s\n", res->data.name);
+            break;
+        }
+        
         prev = prev->sibling;
     }
 
@@ -242,14 +250,17 @@ int removeNode(Tree* root, TreeNode* node) {
 //     if(root->root->sibling) printTree(root->root->sibling, space);
 // }
 
-// void printBranch(TreeNode *node){
+void printTree(Tree *tree) {
+    printBranch(tree->root->kid, tree->root->data.name);
+}
 
-//     TreeNode* current = node;
+void printBranch(TreeNode *node, char *parentName){
+    TreeNode* current = node;
 
-//     if(current->kid != NULL){
-//         printBranch(current->kid);
-//     }
-//     else printf("-->%s\n",current->data.name);
+    if (current != NULL) {
+        printBranch(current->sibling, parentName);
+        printBranch(current->kid, current->data.name);
+        printf("%s in folder %s\n", current->data.name, parentName);
+    }
 
-
-// }
+}
