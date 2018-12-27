@@ -100,6 +100,7 @@ void deleteKids(TreeNode* node) {
         deleteKids(node->kid);
     } else {
         deleteKids(node->sibling);
+        deleteKids(node->kid);
     }
     // if there are no more kids or siblings, delete this node
     free(node);

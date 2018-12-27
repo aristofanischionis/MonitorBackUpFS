@@ -30,11 +30,11 @@ int main(void){
     printTree(tree);
 
     printf("\n");
-    deleteNode(tree, neighbour3);
+    // deleteNode(tree, kid4);
     // deleteKids(kid6->kid);
     // kid6->kid = NULL;
-
-    // deleteNode(tree, tree->root);
+    // printf("hu %s\n", kid5->data.name);
+    deleteNode(tree, tree->root);
     printTree(tree);
 
     free(tree->root);
