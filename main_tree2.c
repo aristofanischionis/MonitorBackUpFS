@@ -37,7 +37,7 @@ int main(void){
     // deleteKids(neighbour->kid);
     // neighbour->kid = NULL;
     printf("\n");
-    deleteNode(tree, tree->root);
+    deleteNode(tree, neighbour);
 
     printTree(tree);
 

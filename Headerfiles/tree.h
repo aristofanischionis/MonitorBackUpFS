@@ -1,11 +1,11 @@
+#ifndef TREE_HEADER
+#define TREE_HEADER
 
-typedef struct  iNodeData{
-    int num;
-} iNodeData;
+#include "inode.h"
 
 typedef struct Data {
     char name[30];
-    iNodeData *myData;
+    INode *inode;
 } Data;
 
 typedef struct  TreeNode {
@@ -31,3 +31,5 @@ int deleteNode(Tree* root, TreeNode* node);
 void printTree(Tree *tree);
 void printBranch(TreeNode *node, char *parentName);
 TreeNode* checker(TreeNode* node, Data data);
+
+#endif

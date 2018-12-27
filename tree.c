@@ -29,11 +29,11 @@ TreeNode* newNode(Data data) {
 // Add a sibling to the tree level of the given node
 TreeNode* addSiblingSorted(TreeNode *node, Data data) {
     // node should be the first node in this level
-    TreeNode *prev;
-    if (node == NULL || prev == NULL) {
+    TreeNode *prev = node;
+    if (node == NULL) {
         return NULL;
     }
-    prev = node;
+    // prev = node;
     // sort from a->z
     while (prev->sibling != NULL) {
         if(strcmp(prev->data.name, data.name) >= 0) break;
@@ -144,7 +144,7 @@ int deleteNode(Tree *tree, TreeNode* node) {
     } else if (!strcmp(prev->sibling->data.name, node->data.name)) {
         prev->sibling = node->sibling;
     }
-    
+
     free(node);
 
     return 0;
