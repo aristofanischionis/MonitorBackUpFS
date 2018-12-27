@@ -22,6 +22,7 @@ int main(void){
     strcpy(data4.name, "N5");
     strcpy(data5.name, "N6");
     strcpy(data6.name, "N7");
+    data4.myData->num = 2;
 
     Tree *tree = initializeTree(data);
     TreeNode* neighbour = addKid(tree->root, data1);
@@ -31,9 +32,25 @@ int main(void){
     TreeNode* kid1 = addKid(neighbour, data5);
     TreeNode* kid2 = addKid(neighbour, data6);
 
-
-    printf("root--> %s\n", tree->root->data.name);
+    printTree(tree);
+    // printf("\n");
+    // deleteKids(neighbour->kid);
+    // neighbour->kid = NULL;
+    printf("\n");
+    deleteNode(tree, tree->root);
 
     printTree(tree);
+
+    free(data.myData);
+    free(data1.myData);
+    free(data2.myData);
+    free(data3.myData);
+    free(data4.myData);
+    free(data5.myData);
+    free(data6.myData);
+
+    free(tree->root);
+    free(tree);
+
     return 0;
 }

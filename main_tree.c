@@ -61,7 +61,7 @@ int main(void){
     // printTree(root, 0);
     ///////
     ///////
-    removeNode(root, kid2);
+    deleteNode(root, kid2);
     res = search(root, data4);
     if(res != NULL)
     printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
