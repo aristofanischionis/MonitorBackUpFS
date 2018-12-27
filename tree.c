@@ -106,25 +106,30 @@ void deleteKids(TreeNode* node) {
 }
 
 TreeNode *findPrevious(TreeNode *node, Data data){
+    if((node == NULL) || (!strcmp(data.name, ""))) {
+        return NULL;
+    }
 
-    if((node == NULL) || (!strcmp(data.name, ""))) return NULL;
     if (node->kid != NULL) {
         if (!strcmp(node->kid->data.name, data.name)) {
             return node;
-        } else {
-            return checker(node->kid, data);
         }
     }
     if (node->sibling != NULL) {
         if (!strcmp(node->sibling->data.name, data.name)) {
             return node;
-        } else {
-            return checker(node->sibling, data);
         }
     }
+
+    TreeNode *res = findPrevious(node->sibling, data);
+    // if node was found dont continue with recursion
+    if (res != NULL) {
+        return res;
+    }
+    findPrevious(node->kid, data);
 }
 
-int deleteNode(Tree *tree, TreeNode* node) {
+int deleteNode(Tree *tree, TreeNode *node) {
 
     if (node == NULL) {
         printf("Couldn't find the node to remove\n");
@@ -137,13 +142,14 @@ int deleteNode(Tree *tree, TreeNode* node) {
     // delete the node under review
     // find the previous node
     TreeNode *prev = findPrevious(tree->root, node->data);
-    if (prev == NULL) return 2;
-    if (!strcmp(prev->kid->data.name, node->data.name)) {
+    if (prev == NULL) {
+        return 2;
+    }
+    if ((prev->kid->data.name != NULL) && (!strcmp(prev->kid->data.name, node->data.name))) {
         prev->kid = node->sibling;
-    } else if (!strcmp(prev->sibling->data.name, node->data.name)) {
+    } else if ((prev->sibling->data.name != NULL) && (!strcmp(prev->sibling->data.name, node->data.name))) {
         prev->sibling = node->sibling;
     }
-
     free(node);
 
     return 0;
@@ -154,12 +160,9 @@ void printTree(Tree *tree) {
 }
 
 void printBranch(TreeNode *node, char *parentName){
-    TreeNode* current = node;
-
-    if (current != NULL) {
-        printBranch(current->sibling, parentName);
-        printBranch(current->kid, current->data.name);
-        printf("%s in folder %s\n", current->data.name, parentName);
+    if (node != NULL) {
+        printBranch(node->sibling, parentName);
+        printBranch(node->kid, node->data.name);
+        printf("%s in folder %s\n", node->data.name, parentName);
     }
-
 }
