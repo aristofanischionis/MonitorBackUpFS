@@ -41,7 +41,11 @@ int main(void){
     ///////////////////////////////////////////////////////
     // printf("name--> %s\n", root->root->data.name);
     TreeNode* res;
+    // res = search(root, data5);
+    // if(res != NULL)
+    // printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
     // res = search(root, data4);
+    // if(res != NULL)
     // printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
     // res = search(root, data1);
     // printf("name : %s and value %d\n", res->data.name, res->data.myData->num);
@@ -57,7 +61,7 @@ int main(void){
     // printTree(root, 0);
     ///////
     ///////
-    removeNode(root, kid1);
+    removeNode(root, kid2);
     res = search(root, data4);
     if(res != NULL)
     printf("name : %s and value %d\n", res->data.name, res->data.myData->num);

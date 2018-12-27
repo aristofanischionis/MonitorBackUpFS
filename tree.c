@@ -136,54 +136,84 @@ TreeNode* addKid(TreeNode *node, Data data) {
 //     return NULL;
 // }
 
-TreeNode *finderKids(TreeNode *toCheck, char *name){
-    // DFS
-    if((toCheck == NULL) || (!strcmp(toCheck->data.name, name))){
-        // printf("toCheck is null or name is found");
-        return toCheck;
-    }
-    toCheck = toCheck->kid;
-    while(toCheck != NULL){
-        if (!strcmp(toCheck->data.name, name))
-        {
-            //found it
-            return toCheck;
-        }
-        toCheck = toCheck->sibling;
-    }
-    return NULL;
+// TreeNode *finderKids(TreeNode *toCheck, char *name){
+//     // DFS
+//     if((toCheck == NULL) || (!strcmp(toCheck->data.name, name))){
+//         // printf("toCheck is null or name is found");
+//         return toCheck;
+//     }
+//     toCheck = toCheck->kid;
+//     while(toCheck != NULL){
+//         if (!strcmp(toCheck->data.name, name))
+//         {
+//             //found it
+//             return toCheck;
+//         }
+//         toCheck = toCheck->sibling;
+//     }
+//     return NULL;
+// }
+
+TreeNode* checker(TreeNode* node, Data data){
+
+    if((node == NULL) || (!strcmp(data.name, ""))) return NULL;
+    if(!strcmp(node->data.name, data.name)) return node;
+
+    if(node->kid != NULL) return checker(node->kid, data);
+    if(node->sibling != NULL) return checker(node->sibling, data);
 }
 
-TreeNode* search(Tree *root, Data data) {
+TreeNode* search(Tree *tree, Data data){
     // base case
-    if ((root == NULL) || (root->root == NULL) || (!strcmp(root->root->data.name, data.name))) {
-        return root->root;
+    if ((tree == NULL) || (tree->root == NULL) || (!strcmp(tree->root->data.name, data.name))) {
+        return tree->root;
     }
-    TreeNode *res;
-    TreeNode* toCheck;
-    toCheck = root->root;
-    // res = root->root;
-    while(toCheck != NULL) {
-        // search its children
-        res = finderKids(toCheck, data.name);
-        if (res != NULL) {
-            return res;
-        }
-        toCheck = toCheck->sibling;
+    TreeNode *node, *res;
+    node = tree->root;
+    res = checker(node, data);
+    if(res == NULL){
+        printf("Couldn't find the desired name : %s\n", data.name);
+        return NULL;
     }
-
-    printf("I couldn't find %s\n", data.name);
-    return NULL;
+    return res;
 }
 
-void deleteNodeSiblings(TreeNode* node) {
-    if(node == NULL) return;
-    printf("Went through node --> null\n");
-    fflush(stdout);
-    if (node->sibling != NULL) {
-        printf("hi there");
-        deleteNodeSiblings(node->sibling);
-    }
+// TreeNode* search(Tree *root, Data data) {
+//     // base case
+//     if ((root == NULL) || (root->root == NULL) || (!strcmp(root->root->data.name, data.name))) {
+//         return root->root;
+//     }
+//     TreeNode *res;
+//     TreeNode* toCheck;
+//     toCheck = root->root;
+//     // res = root->root;
+//     while(toCheck != NULL) {
+//         // search its children
+//         res = finderKids(toCheck, data.name);
+//         if (res != NULL) {
+//             return res;
+//         }
+//         toCheck = toCheck->sibling;
+//     }
+
+//     printf("I couldn't find %s\n", data.name);
+//     return NULL;
+// }
+
+TreeNode* deleteNodeSiblings(TreeNode* node) {
+    if (node == NULL) return NULL;
+    if(node->kid == NULL) return node;
+    if(node->sibling == NULL) return node;
+    TreeNode* res;
+    if (node->kid != NULL){
+        res = deleteNodeSiblings(node->kid);
+        // free(res);
+    } 
+    if (node->sibling != NULL){
+        res = deleteNodeSiblings(node->sibling);
+        // free(res);
+    } 
+    if(res != NULL) free(res);
     free(node);
 }
 
@@ -209,10 +239,10 @@ int removeNode(Tree* root, TreeNode* node) {
             break;
         }
         // search its children
-        res = finderKids(prev->sibling, node->data.name);
+        res = checker(prev->sibling, node->data);
         if (res != NULL) {
             // prev->sibling = res;
-            parent = prev->sibling;
+            parent = prev;
             printf("=========%s\n", parent->data.name);
             break;
         }
@@ -228,7 +258,7 @@ int removeNode(Tree* root, TreeNode* node) {
 
     if(parent != NULL){
         if(!strcmp(parent->kid->data.name, res->data.name)){
-            //then it is the first kid
+            //then if is the first kid
             // so change it
             parent->kid = res->sibling;
         }

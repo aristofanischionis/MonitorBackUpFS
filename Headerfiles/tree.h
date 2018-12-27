@@ -28,3 +28,4 @@ TreeNode* search(Tree *root, Data data);
 int removeNode(Tree* root, TreeNode* node);
 void printTree(Tree *tree);
 void printBranch(TreeNode *node, char *parentName);
+TreeNode* checker(TreeNode* node, Data data);
