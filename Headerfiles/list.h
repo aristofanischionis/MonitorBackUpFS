@@ -9,11 +9,11 @@ typedef struct List {
 } List;
 
 List * initializeList(void);
-int addSourceNode(List **list, char *path);
-int addCopyNode(List **list, int inodeNum, char *path, int inodeNumOriginal);
-INode * searchForNode(List *list, int inodeNum);
-void printNodes(List *list);
-int deleteNode(List **list, int inodeNum);
+INode * addINode(List **list, char *path);
+int pointToCopy(List *list, INode *inode, int inodeNumCopy);
+INode * searchForINode(List *list, int inodeNum);
+void printINodes(List *list);
+int deleteINode(List **list, int inodeNum);
 INode * normalDelete(List **list, int inodeNum);
 
 #endif

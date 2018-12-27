@@ -3,11 +3,11 @@
 
 int main(int argc, char const *argv[]) {
     List *list = initializeList();
-    addSourceNode(&list, "list.c");
-    addSourceNode(&list, "useless.c");
-    printNodes(list);
-    deleteNode(&list, 1838157);
+    addINode(&list, "list.c");
+    addINode(&list, "useless.c");
+    printINodes(list);
+    deleteINode(&list, 6644);
     printf("...\n");
-    printNodes(list);
+    printINodes(list);
     return 0;
 }

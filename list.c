@@ -13,15 +13,15 @@ List * initializeList(void) {
     return list;
 }
 
-// Add an original inode to the start of list
-int addSourceNode(List **list, char *path) {
+// Add a node to the beginning of the list
+INode * addINode(List **list, char *path) {
     struct stat buf;
     if (stat(path, &buf) == -1) {
         perror("Error using stat");
         exit(1);
     }
 
-    INode *node = searchForNode(*list, (int) buf.st_ino);
+    INode *node = searchForINode(*list, (int) buf.st_ino);
     // check if given node exists
     if (node != NULL) {
         // if inode already exists then add path name to its nameList and increase counter
@@ -43,43 +43,18 @@ int addSourceNode(List **list, char *path) {
     return 0;
 }
 
-// Add a copied inode to the start of list
-int addCopyNode(List **list, int inodeNum, char *path, int inodeNumOriginal) {
-    INode *originalNode = searchForNode(*list, inodeNumOriginal);
-
-    struct stat buf;
-    if (stat(path, &buf) == -1) {
-        perror("Error using stat");
-        exit(1);
-    }
-
-    INode *node = searchForNode(*list, (int) buf.st_ino);
-    // check if given node exists
-    if (node != NULL) {
-        // if inode already exists then add path name to its nameList and increase counter
-        addName(&node->names, path);
-        node->nameCount++;
+// Make a source node point to its copy
+int pointToCopy(List *list, INode *inode, int inodeNumCopy) {
+    INode *copy = searchForINode(list, inodeNumCopy);
+    if (copy == NULL) {
         return 1;
     }
-
-    // Allocate memory for node
-    INode *newNode = (INode *)malloc(sizeof(INode));
-
-    newNode->inodeNum = (int) buf.st_ino;
-    newNode->modDate = originalNode->modDate;
-    newNode->size = originalNode->size;
-    newNode->names = initializeNameList();
-    newNode->nameCount = originalNode->nameCount;
-    newNode->copy = originalNode;
-    newNode->next = NULL;
-    // Change head pointer as new node is added at the beginning
-    (*list)->head = newNode;
-
+    inode->copy = copy;
     return 0;
 }
 
 // Find if an inode exists and return it else return null
-INode * searchForNode(List *list, int inodeNum) {
+INode * searchForINode(List *list, int inodeNum) {
     // if list is empty return null
     if (list->head == NULL) {
         return NULL;
@@ -97,7 +72,7 @@ INode * searchForNode(List *list, int inodeNum) {
 }
 
 // Print all nodes
-void printNodes(List *list) {
+void printINodes(List *list) {
     INode *current = list->head;
 
     while (current != NULL) {
@@ -107,8 +82,8 @@ void printNodes(List *list) {
 }
 
 // Delete given inode and all copies pointing to this inode
-int deleteNode(List **list, int inodeNum) {
-    INode *node = searchForNode(*list, inodeNum);
+int deleteINode(List **list, int inodeNum) {
+    INode *node = searchForINode(*list, inodeNum);
     // check if given node exists
     if (node == NULL) {
         return 1;

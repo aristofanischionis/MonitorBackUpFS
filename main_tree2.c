@@ -5,49 +5,34 @@
 
 int main(void){
 
-    Data data, data1, data2, data3, data4 , data5, data6;
+    Data data, data1, data2, data3, data4 , data5, data6, data7, data8;
 
-    data.myData = (iNodeData*) malloc(sizeof(iNodeData));
-    data1.myData = (iNodeData*) malloc(sizeof(iNodeData));
-    data2.myData = (iNodeData*) malloc(sizeof(iNodeData));
-    data3.myData = (iNodeData*) malloc(sizeof(iNodeData));
-    data4.myData = (iNodeData*) malloc(sizeof(iNodeData));
-    data5.myData = (iNodeData*) malloc(sizeof(iNodeData));
-    data6.myData = (iNodeData*) malloc(sizeof(iNodeData));
-
-    strcpy(data.name, "N1");
-    strcpy(data1.name, "N2");
-    strcpy(data2.name, "N3");
-    strcpy(data3.name, "N4");
-    strcpy(data4.name, "N5");
-    strcpy(data5.name, "N6");
-    strcpy(data6.name, "N7");
-    data4.myData->num = 2;
+    strcpy(data.name, "N0");
+    strcpy(data1.name, "N1");
+    strcpy(data2.name, "N2");
+    strcpy(data3.name, "N3");
+    strcpy(data4.name, "N4");
+    strcpy(data5.name, "N5");
+    strcpy(data6.name, "N6");
+    strcpy(data7.name, "N7");
+    strcpy(data8.name, "N8");
 
     Tree *tree = initializeTree(data);
-    TreeNode* neighbour = addKid(tree->root, data1);
-    TreeNode* neighbour1 = addKid(tree->root, data2);
-    TreeNode* neighbour2 = addKid(tree->root, data3);
-    TreeNode* kid = addKid(neighbour, data4);
-    TreeNode* kid1 = addKid(neighbour, data5);
-    TreeNode* kid2 = addKid(neighbour, data6);
+    TreeNode* neighbour1 = addKid(tree->root, data1);
+    TreeNode* neighbour2 = addKid(tree->root, data2);
+    TreeNode* neighbour3 = addKid(tree->root, data3);
+    TreeNode* kid4 = addKid(neighbour1, data4);
+    TreeNode* kid5 = addKid(neighbour1, data5);
+    TreeNode* kid6 = addKid(neighbour1, data6);
+    TreeNode* kid7 = addKid(neighbour3, data7);
+    TreeNode* kid8 = addKid(kid6, data8);
 
     printTree(tree);
-    // printf("\n");
-    // deleteKids(neighbour->kid);
-    // neighbour->kid = NULL;
+
     printf("\n");
-    deleteNode(tree, neighbour);
+    deleteNode(tree, neighbour2);
 
     printTree(tree);
-
-    free(data.myData);
-    free(data1.myData);
-    free(data2.myData);
-    free(data3.myData);
-    free(data4.myData);
-    free(data5.myData);
-    free(data6.myData);
 
     free(tree->root);
     free(tree);

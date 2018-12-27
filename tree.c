@@ -102,7 +102,6 @@ void deleteKids(TreeNode* node) {
         deleteKids(node->sibling);
     }
     // if there are no more kids or siblings, delete this node
-    free(node->data.myData);
     free(node);
 }
 
