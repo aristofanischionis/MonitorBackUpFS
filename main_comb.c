@@ -4,6 +4,7 @@
 #include <string.h>
 #include "Headerfiles/tree.h"
 #include "Headerfiles/functions.h"
+#include "Headerfiles/list.h"
 
 int main(int argc, char const *argv[]) {
 
@@ -17,8 +18,14 @@ int main(int argc, char const *argv[]) {
     char *backupFilename = malloc(strlen(argv[2])+1);
     strcpy(backupFilename, argv[2]);
 
-    readDirectory(sourceFilename);
-    readDirectory(backupFilename);
+    List *sourceINodes = initializeList();
+    List *backupINodes = initializeList();
+
+    readDirectory(sourceFilename, &sourceINodes);
+    readDirectory(backupFilename, &backupINodes);
+
+    printINodes(sourceINodes);
+    printINodes(backupINodes);
 
     return 0;
 }

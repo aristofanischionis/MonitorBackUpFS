@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Headerfiles/list.h"
+#include "Headerfiles/namelist.h"
 
 // Allocate memory for list of inodes struct
 List * initializeList(void) {
