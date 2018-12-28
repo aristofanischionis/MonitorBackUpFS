@@ -27,7 +27,7 @@ INode * addINode(List **list, char *path) {
         // if inode already exists then add path name to its nameList and increase counter
         addName(&node->names, path);
         node->nameCount++;
-        return 1;
+        return NULL;
     }
 
     INode *newNode = (INode *)malloc(sizeof(INode));
@@ -40,7 +40,7 @@ INode * addINode(List **list, char *path) {
     newNode->next = (*list)->head;
     // Change head pointer as new node is added at the beginning
     (*list)->head = newNode;
-    return 0;
+    return (*list)->head;
 }
 
 // Make a source node point to its copy
