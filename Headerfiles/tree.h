@@ -2,9 +2,11 @@
 #define TREE_HEADER
 
 #include "inode.h"
+#include "defines.h"
+
 
 typedef struct Data {
-    char name[30];
+    char name[MAX];
     INode *inode;
 } Data;
 

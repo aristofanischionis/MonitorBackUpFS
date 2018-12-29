@@ -18,13 +18,31 @@ int main(int argc, char const *argv[]) {
     char *backupFilename = malloc(strlen(argv[2])+1);
     strcpy(backupFilename, argv[2]);
 
+    Data sourceData, backupData;
+    strcpy(sourceData.name, sourceFilename);
+    strcpy(backupData.name, backupFilename);
+
     List *sourceINodes = initializeList();
     List *backupINodes = initializeList();
 
-    readDirectory(sourceFilename, &sourceINodes);
-    readDirectory(backupFilename, &backupINodes);
+    INode *sourceNode = addINode(&sourceINodes, sourceFilename);
+    INode *backupNode = addINode(&backupINodes, backupFilename);
+    sourceData.inode = sourceNode;
+    backupData.inode = backupNode;
 
+    Tree *sourceTree = initializeTree(sourceData);
+    Tree *backupTree = initializeTree(backupData);
+
+    readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
+    readDirectory(backupFilename, &backupINodes, backupTree->root);
+
+    printf("Source Tree:\n");
+    printTree(sourceTree);
+    printf("Backup Tree:\n");
+    printTree(backupTree);
+    printf("Source iNodes:\n");
     printINodes(sourceINodes);
+    printf("Backup iNodes:\n");
     printINodes(backupINodes);
 
     return 0;

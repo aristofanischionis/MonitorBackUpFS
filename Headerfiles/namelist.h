@@ -1,8 +1,10 @@
 #ifndef NAMELIST_HEADER
 #define NAMELIST_HEADER
 
+#include "defines.h"
+
 typedef struct NameListNode {
-    char name[20];
+    char name[MAX];
     struct NameListNode *next;
 } NameListNode;
 
