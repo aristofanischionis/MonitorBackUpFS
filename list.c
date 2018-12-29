@@ -149,3 +149,19 @@ INode * normalDelete(List **list, int inodeNum) {
     free(n);
     return prev->next;
 }
+
+void deleteList(List **list) {
+    INode* current = (*list)->head;
+    INode* next;
+
+    while (current != NULL) {
+       next = current->next;
+
+       deleteNameList(&current->names);
+       free(current->names);
+       free(current);
+       current = next;
+    }
+
+    free(*list);
+}

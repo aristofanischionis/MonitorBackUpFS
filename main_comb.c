@@ -36,6 +36,7 @@ int main(int argc, char const *argv[]) {
     readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
     readDirectory(backupFilename, &backupINodes, backupTree->root);
 
+    // Print structures
     printf("Source Tree:\n");
     printTree(sourceTree);
     printf("Backup Tree:\n");
@@ -44,6 +45,19 @@ int main(int argc, char const *argv[]) {
     printINodes(sourceINodes);
     printf("Backup iNodes:\n");
     printINodes(backupINodes);
+
+    // Free allocated memory
+    deleteNode(sourceTree, sourceTree->root);
+    deleteNode(backupTree, backupTree->root);
+    deleteList(&sourceINodes);
+    deleteList(&backupINodes);
+    free(sourceFilename);
+    free(backupFilename);
+    free(sourceTree->root);
+    free(backupTree->root);
+    free(sourceTree);
+    free(backupTree);
+    
 
     return 0;
 }

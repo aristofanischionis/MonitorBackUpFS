@@ -15,5 +15,6 @@ INode * searchForINode(List *list, int inodeNum);
 void printINodes(List *list);
 int deleteINode(List **list, int inodeNum);
 INode * normalDelete(List **list, int inodeNum);
+void deleteList(List **list);
 
 #endif
