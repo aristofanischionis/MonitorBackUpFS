@@ -5,6 +5,7 @@
 #include "Headerfiles/tree.h"
 #include "Headerfiles/functions.h"
 #include "Headerfiles/list.h"
+#include "Headerfiles/traverse.h"
 
 int main(int argc, char const *argv[]) {
 
@@ -34,15 +35,21 @@ int main(int argc, char const *argv[]) {
     Tree *backupTree = initializeTree(backupData);
 
     readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
-    readDirectory(backupFilename, &backupINodes, backupTree->root);
+    // readDirectory(backupFilename, &backupINodes, backupTree->root);
+    
+    // traverseAlgorithm(sourceTree->root->kid, backupTree->root->kid);
+    traverseTrees(&sourceTree, &backupTree);
 
     // Print structures
     printf("Source Tree:\n");
     printTree(sourceTree);
+    printf("\n");
     printf("Backup Tree:\n");
     printTree(backupTree);
+    printf("\n");
     printf("Source iNodes:\n");
     printINodes(sourceINodes);
+    printf("\n");
     printf("Backup iNodes:\n");
     printINodes(backupINodes);
 
