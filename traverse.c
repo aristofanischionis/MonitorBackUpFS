@@ -13,35 +13,28 @@ void traverseTrees(Tree **sourceTree, Tree **backupTree) {
 }
 
 void recurseAlgorithm(TreeNode *sourceNode, TreeNode *backupNode) {
-    if (sourceNode == NULL && backupNode == NULL) {
+    if (sourceNode == NULL && backupNode == NULL) { // auto mporei kai na min xreiazetai
         return;
     }
     int siblingCase = returnCase(sourceNode->sibling, backupNode->sibling);
     if (siblingCase == 1) {
         TreeNode *backupSibling = addSiblingSorted(backupNode, sourceNode->sibling->data);
         recurseAlgorithm(sourceNode->sibling, backupSibling);
-    } else {
-        return;
-    }
+    } 
     int kidCase = returnCase(sourceNode->kid, backupNode->kid);
     if (kidCase == 1) {
         TreeNode *backupKid = addKid(backupNode, sourceNode->kid->data);  
         recurseAlgorithm(sourceNode->kid, backupKid);   
-    } else {
-        return;
-    }
+    } 
     
 }
 
 int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
 
     if (sourceNode == NULL && backupNode == NULL) {
-        printf("both nodes null return 0\n");
         return 0;
     } else if (backupNode == NULL) {
-        printf("backup node is null need to add node\n");
         return 1;
-
     }
     // if katalogos stin pigi oxi ston proorismo
     // if katalogos oxi stin pigi alla ston proorismo

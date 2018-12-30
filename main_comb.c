@@ -46,12 +46,12 @@ int main(int argc, char const *argv[]) {
     printf("\n");
     printf("Backup Tree:\n");
     printTree(backupTree);
-    printf("\n");
-    printf("Source iNodes:\n");
-    printINodes(sourceINodes);
-    printf("\n");
-    printf("Backup iNodes:\n");
-    printINodes(backupINodes);
+    // printf("\n");
+    // printf("Source iNodes:\n");
+    // printINodes(sourceINodes);
+    // printf("\n");
+    // printf("Backup iNodes:\n");
+    // printINodes(backupINodes);
 
     // Free allocated memory
     deleteNode(sourceTree, sourceTree->root);
