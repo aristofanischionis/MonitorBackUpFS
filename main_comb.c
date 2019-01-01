@@ -38,7 +38,6 @@ int main(int argc, char const *argv[]) {
     // tha diavazei arxeia backup mono otan iparxei idi to backup
     // readDirectory(backupFilename, &backupINodes, backupTree->root);
     
-    // traverseAlgorithm(sourceTree->root->kid, backupTree->root->kid);
     traverseTrees(&sourceTree, &backupTree);
 
     // Print structures
@@ -47,12 +46,26 @@ int main(int argc, char const *argv[]) {
     printf("\n");
     printf("Backup Tree:\n");
     printTree(backupTree);
+    // printf("\n");
+    // printf("Source iNodes:\n");
+    // printINodes(sourceINodes);
+    // printf("\n");
+    // printf("Backup iNodes:\n");
+    // printINodes(backupINodes);
+
+
+    Data dataa;
+    strcpy(dataa.name, "kati2");
+    
+    deleteNode(sourceTree, search(sourceTree, dataa));
+    traverseTrees(&sourceTree, &backupTree);
+    printf("After delete\n\n");
+    printf("Source Tree:\n");
+    printTree(sourceTree);
     printf("\n");
-    printf("Source iNodes:\n");
-    printINodes(sourceINodes);
-    printf("\n");
-    printf("Backup iNodes:\n");
-    printINodes(backupINodes);
+    printf("Backup Tree:\n");
+    printTree(backupTree);
+
 
     // Free allocated memory
     deleteNode(sourceTree, sourceTree->root);
@@ -65,7 +78,6 @@ int main(int argc, char const *argv[]) {
     free(backupTree->root);
     free(sourceTree);
     free(backupTree);
-    
 
     return 0;
 }

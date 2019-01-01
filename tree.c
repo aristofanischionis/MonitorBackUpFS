@@ -127,7 +127,7 @@ TreeNode *findPrevious(TreeNode *node, Data data){
     if (res != NULL) {
         return res;
     }
-    // findPrevious(node->kid, data);
+    findPrevious(node->kid, data);
 }
 
 int deleteNode(Tree *tree, TreeNode *node) {
