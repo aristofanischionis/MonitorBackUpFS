@@ -27,12 +27,12 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     } else {
         while ((direntp = readdir(file_ptr)) != NULL) {
             sprintf(path, "%s/%s",filename, direntp->d_name);
-            strcpy(data.name, path);
-            // printf("inode %d of the entry %s\n" , \
-            // (int)direntp->d_ino, direntp->d_name);
+            // strcpy(data.name, path);
+            strcpy(data.name, direntp->d_name);
             // if this is a file (not a pipe, socket, etc) add an inode
             if(isREG(direntp->d_type)) {
                 INode *node = addINode(list, path);               
+                // INode *node = addINode(list, direntp->d_name);               
                 data.inode = node;
                 addKid(previous, data);
             }
@@ -42,6 +42,7 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
                 if (!isDot(direntp->d_name)) {
                     // if it is a new directory add 
                     INode *node = addINode(list, path);
+                    // INode *node = addINode(list, direntp->d_name);
                     data.inode = node;
                     TreeNode *treenode = addKid(previous, data);
                     readDirectory(path, list, treenode);
