@@ -3,6 +3,8 @@
         "poll.h": "c",
         "tree.h": "c",
         "stdio.h": "c",
-        "functions.h": "c"
+        "functions.h": "c",
+        "inotify.h": "c",
+        "inotifycode.h": "c"
     }
 }

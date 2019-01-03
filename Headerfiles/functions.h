@@ -5,8 +5,8 @@
 #include "list.h"
 #include "defines.h"
 
-int isDirectory(const char *path);
 int isDot(char *name);
 void readDirectory(char *filename, List **list, TreeNode *previous);
+void makeBackup(char *source, char *backup);
 
 #endif

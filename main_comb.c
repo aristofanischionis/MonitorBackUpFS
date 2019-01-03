@@ -46,12 +46,12 @@ int main(int argc, char const *argv[]) {
     printf("\n");
     printf("Backup Tree:\n");
     printTree(backupTree);
-    // printf("\n");
-    // printf("Source iNodes:\n");
-    // printINodes(sourceINodes);
-    // printf("\n");
-    // printf("Backup iNodes:\n");
-    // printINodes(backupINodes);
+    printf("\n");
+    printf("Source iNodes:\n");
+    printINodes(sourceINodes);
+    printf("\n");
+    printf("Backup iNodes:\n");
+    printINodes(backupINodes);
 
 
     Data dataa;
@@ -65,6 +65,10 @@ int main(int argc, char const *argv[]) {
     printf("\n");
     printf("Backup Tree:\n");
     printTree(backupTree);
+
+
+    // let's make the backup folder
+    makeBackup(sourceFilename, backupFilename);
 
 
     // Free allocated memory
