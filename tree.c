@@ -28,25 +28,24 @@ TreeNode* newNode(Data data) {
 
 // Add a sibling to the tree level of the given node
 TreeNode* addSiblingSorted(TreeNode *node, Data data) {
-    // node should be the first node in this level
-    TreeNode *prev = node;
+    // we have to find the node that will be next of the given one
+    TreeNode *next = node;
     if (node == NULL) {
         return NULL;
     }
-    // prev = node;
+    TreeNode *prev;
     // sort from a->z
-    while (prev->sibling != NULL) {
-        if(strcmp(prev->data.name, data.name) >= 0) break;
-        prev = prev->sibling;
+    // while (prev->sibling != NULL) {
+    while (next != NULL) {
+        if(strcmp(next->data.name, data.name) >= 0) break;
+        prev = next;
+        next = next->sibling;
     }
-    // at prev we now have the prev node
     TreeNode *new = newNode(data);
-    // the previous' node sibling will be the new ones sibl
-    new->sibling = prev->sibling;
-    // previous' sibling becomes the new node
     prev->sibling = new;
-    return new;
+    new->sibling = next;
 
+    return new;
 }
 
 // Add a kid to the given node
@@ -57,7 +56,16 @@ TreeNode* addKid(TreeNode *node, Data data) {
     // if there is already a kid, add it as a sibling to it
     // else add it as the first kid
     if (node->kid != NULL) {
-        return addSiblingSorted(node->kid, data);
+        // if the new node's must be inserted as the first child (at the start
+        // of the list)
+        if (strcmp(node->kid->data.name, data.name) >= 0) {
+            TreeNode *new = newNode(data);
+            new->sibling = node->kid;
+            node->kid = new;
+            return new;
+        } else {
+            return addSiblingSorted(node->kid, data);
+        }
     } else {
         return (node->kid = newNode(data));
     }
