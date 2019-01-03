@@ -37,29 +37,21 @@ int main(int argc, char const *argv[]) {
     readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
     // tha diavazei arxeia backup mono otan iparxei idi to backup
     readDirectory(backupFilename, &backupINodes, backupTree->root);
-
-    printf("Before traverse:\n");
-    printf("Source Tree:\n");
-    printTree(sourceTree);
-    printf("\n");
-    printf("Backup Tree:\n");
-    printTree(backupTree);
-    printf("\n");
     
     traverseTrees(&sourceTree, &backupTree);
 
     // Print structures
-    printf("Source Tree:\n");
+    printf("\n\nSource Tree:\n");
     printTree(sourceTree);
     printf("\n");
     printf("Backup Tree:\n");
     printTree(backupTree);
     printf("\n");
-    printf("Source iNodes:\n");
-    printINodes(sourceINodes);
-    printf("\n");
-    printf("Backup iNodes:\n");
-    printINodes(backupINodes);
+    // printf("Source iNodes:\n");
+    // printINodes(sourceINodes);
+    // printf("\n");
+    // printf("Backup iNodes:\n");
+    // printINodes(backupINodes);
 
 
     // Data dataa;
@@ -76,7 +68,7 @@ int main(int argc, char const *argv[]) {
 
 
     // let's make the backup folder
-    makeBackup(sourceFilename, backupFilename);
+    // makeBackup(sourceFilename, backupFilename);
 
 
     // Free allocated memory

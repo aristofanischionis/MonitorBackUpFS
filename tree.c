@@ -35,7 +35,6 @@ TreeNode* addSiblingSorted(TreeNode *node, Data data) {
     }
     TreeNode *prev;
     // sort from a->z
-    // while (prev->sibling != NULL) {
     while (next != NULL) {
         if(strcmp(next->data.name, data.name) >= 0) break;
         prev = next;
@@ -44,7 +43,6 @@ TreeNode* addSiblingSorted(TreeNode *node, Data data) {
     TreeNode *new = newNode(data);
     prev->sibling = new;
     new->sibling = next;
-
     return new;
 }
 
@@ -138,11 +136,11 @@ TreeNode *findPrevious(TreeNode *node, Data data){
     findPrevious(node->kid, data);
 }
 
-int deleteNode(Tree *tree, TreeNode *node) {
+TreeNode * deleteNode(Tree *tree, TreeNode *node) {
 
     if (node == NULL) {
         printf("Couldn't find the node to remove\n");
-        return 1;
+        return NULL;
     }
     // delete all of its kids, so all the siblings of its kid
     deleteKids(node->kid);
@@ -152,7 +150,7 @@ int deleteNode(Tree *tree, TreeNode *node) {
     // find the previous node
     TreeNode *prev = findPrevious(tree->root, node->data);
     if (prev == NULL) {
-        return 2;
+        return NULL;
     }
     if ((prev->kid->data.name != NULL) && (!strcmp(prev->kid->data.name, node->data.name))) {
         prev->kid = node->sibling;
@@ -161,7 +159,7 @@ int deleteNode(Tree *tree, TreeNode *node) {
     }
     free(node);
 
-    return 0;
+    return prev;
 }
 
 void printTree(Tree *tree) {

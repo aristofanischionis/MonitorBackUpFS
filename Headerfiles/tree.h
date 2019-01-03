@@ -29,7 +29,7 @@ TreeNode* finderKids(TreeNode *toCheck, char *name);
 TreeNode* search(Tree *root, Data data);
 void deleteKids(TreeNode* node);
 TreeNode *findPrevious(TreeNode *node, Data data);
-int deleteNode(Tree* root, TreeNode* node);
+TreeNode * deleteNode(Tree* root, TreeNode* node);
 void printTree(Tree *tree);
 void printBranch(TreeNode *node, char *parentName);
 TreeNode* checker(TreeNode* node, Data data);
