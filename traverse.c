@@ -8,17 +8,12 @@ void traverseTrees(Tree **sourceTree, Tree **backupTree) {
     int firstCase = returnCase((*sourceTree)->root->kid, (*backupTree)->root->kid);
     if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) {  
         addKid((*backupTree)->root, (*sourceTree)->root->kid->data);  
-
-         
-        // call recurseAlgorithm for first kid of roots
-        printf("first rec : %s %s \n", (*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name);
-        recurseAlgorithm(*sourceTree, *backupTree, (*sourceTree)->root->kid, (*backupTree)->root->kid);  
+        printf("first rec : %s %s \n", (*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name);  
     }
     else if (firstCase == FILE_IN_BACKUP || firstCase == DIR_IN_BACKUP) {
-        deleteNode(*backupTree, (*backupTree)->root->kid);
-        // call recurseAlgorithm for first kid of roots
-        recurseAlgorithm(*sourceTree, *backupTree, (*sourceTree)->root->kid, (*backupTree)->root->kid);
+        deleteNode(*backupTree, (*backupTree)->root->kid); 
     } 
+    recurseAlgorithm(*sourceTree, *backupTree, (*sourceTree)->root->kid, (*backupTree)->root->kid);
     
 }
 
