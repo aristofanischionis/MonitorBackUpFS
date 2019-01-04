@@ -4,22 +4,17 @@
 #include "Headerfiles/traverse.h"
 
 void traverseTrees(Tree **sourceTree, Tree **backupTree) {
-    // check case for first kid of roots
-    int firstCase = returnCase((*sourceTree)->root->kid, (*backupTree)->root->kid);
-    if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) {  
-        addKid((*backupTree)->root, (*sourceTree)->root->kid->data);  
-
-         
-        // call recurseAlgorithm for first kid of roots
-        printf("first rec : %s %s \n", (*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name);
-        recurseAlgorithm(*sourceTree, *backupTree, (*sourceTree)->root->kid, (*backupTree)->root->kid);  
+    while (strcmp((*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name)) {
+        // check case for first kid of roots
+        int firstCase = returnCase((*sourceTree)->root->kid, (*backupTree)->root->kid);
+        if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) {  
+            addKid((*backupTree)->root, (*sourceTree)->root->kid->data);  
+        }
+        else if (firstCase == FILE_IN_BACKUP || firstCase == DIR_IN_BACKUP) {
+            deleteNode(*backupTree, (*backupTree)->root->kid); 
+        } 
     }
-    else if (firstCase == FILE_IN_BACKUP || firstCase == DIR_IN_BACKUP) {
-        deleteNode(*backupTree, (*backupTree)->root->kid);
-        // call recurseAlgorithm for first kid of roots
-        recurseAlgorithm(*sourceTree, *backupTree, (*sourceTree)->root->kid, (*backupTree)->root->kid);
-    } 
-    
+    recurseAlgorithm(*sourceTree, *backupTree, (*sourceTree)->root->kid, (*backupTree)->root->kid);   
 }
 
 void recurseAlgorithm(Tree *sourceTree, Tree *backupTree,
@@ -34,9 +29,8 @@ void recurseAlgorithm(Tree *sourceTree, Tree *backupTree,
         recurseAlgorithm(sourceTree, backupTree, sourceNode->sibling, backupSibling);
     } 
     else if (siblingCase == FILE_IN_BACKUP || siblingCase == DIR_IN_BACKUP) {
-        deleteNode(backupTree, backupNode->sibling);
-        // no recursion on siblings needed because node has been removed from
-        // the end of the siblings list
+        TreeNode * backupPrev = deleteNode(backupTree, backupNode->sibling);
+        recurseAlgorithm(sourceTree, backupTree, sourceNode, backupPrev);
     }
     else if (siblingCase == FILE_IN_BOTH) {
         recurseAlgorithm(sourceTree, backupTree, sourceNode->sibling, backupNode->sibling);
@@ -48,9 +42,8 @@ void recurseAlgorithm(Tree *sourceTree, Tree *backupTree,
         recurseAlgorithm(sourceTree, backupTree, sourceNode->kid, backupKid);   
     }
     else if (kidCase == FILE_IN_BACKUP || kidCase == DIR_IN_BACKUP) {
-        deleteNode(backupTree, backupNode->kid);
-        // no recursion on kids needed because node has been removed from
-        // the end of the kids list
+        TreeNode * backupPrev = deleteNode(backupTree, backupNode->kid);
+        recurseAlgorithm(sourceTree, backupTree, sourceNode, backupPrev);
     } 
     else if (kidCase == FILE_IN_BOTH) {
         recurseAlgorithm(sourceTree, backupTree, sourceNode->kid, backupNode->kid);
@@ -61,6 +54,7 @@ void recurseAlgorithm(Tree *sourceTree, Tree *backupTree,
 int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
     printf("%s      %s       ", sourceNode->data.name, backupNode->data.name);
     if (sourceNode == NULL && backupNode == NULL) {
+        printf("is null\n");
         return 0;
     }
     // if there is a node (directory/file) in source (at the end of the list of

@@ -108,3 +108,4 @@ void deleteNameList(NameList **list) {
         current = next;
     }
 }
+

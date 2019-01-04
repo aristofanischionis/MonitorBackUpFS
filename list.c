@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 #include <stdio.h>
+#include <libgen.h>
 #include <stdlib.h>
 #include <string.h>
 #include "Headerfiles/list.h"
@@ -21,12 +22,14 @@ INode * addINode(List **list, char *path) {
         perror("Error using stat");
         exit(1);
     }
+    // extract filename from path
+    char *filename = basename(path);
 
     INode *node = searchForINode(*list, (int) buf.st_ino);
     // check if given node exists
     if (node != NULL) {
         // if inode already exists then add path name to its nameList and increase counter
-        addName(&node->names, path);
+        addName(&node->names, filename);
         node->nameCount++;
         return NULL;
     }
@@ -36,7 +39,8 @@ INode * addINode(List **list, char *path) {
     newNode->modDate = buf.st_mtime;
     newNode->size = buf.st_size;
     newNode->names = initializeNameList();
-    newNode->nameCount = (int) buf.st_nlink;
+    addName(&newNode->names, filename);
+    newNode->nameCount = 1;
     newNode->copy = NULL;
     newNode->next = (*list)->head;
     // Change head pointer as new node is added at the beginning
@@ -77,7 +81,9 @@ void printINodes(List *list) {
     INode *current = list->head;
 
     while (current != NULL) {
-        printf("%d %ld %s\n", current->inodeNum, current->size, ctime(&current->modDate));
+        printf("%d %ld %s with names\t", current->inodeNum, current->size, ctime(&current->modDate));
+        printNames(current->names);
+        printf("\n");
         current = current->next;
     }
 }
