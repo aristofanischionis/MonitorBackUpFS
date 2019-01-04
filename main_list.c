@@ -6,7 +6,7 @@ int main(int argc, char const *argv[]) {
     addINode(&list, "list.c");
     addINode(&list, "useless.c");
     printINodes(list);
-    deleteINode(&list, 6644);
+    // deleteINode(&list, 6644);
     printf("...\n");
     printINodes(list);
     return 0;

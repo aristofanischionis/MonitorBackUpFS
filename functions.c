@@ -37,9 +37,9 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
             if (isDIR(direntp->d_type)) {
                 // check if it a new directory (not a . or ..)
                 if (!isDot(direntp->d_name)) {
-                    // if it is a new directory add
-                    INode *node = addINode(list, path);
-                    data.inode = node;
+                    // if it is a new directory add it onnly to the tree
+                    // INode *node = addINode(list, path);
+                    // data.inode = node;
                     TreeNode *treenode = addKid(previous, data);
                     readDirectory(path, list, treenode);
                 }

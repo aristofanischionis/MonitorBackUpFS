@@ -88,13 +88,21 @@ void printINodes(List *list) {
     }
 }
 
-// Delete given inode and all copies pointing to this inode
-int deleteINode(List **list, int inodeNum) {
+// Delete given inode and all copies pointing to this inode, only if this inode
+// has only one name pointing to it
+int deleteINode(List **list, int inodeNum, char *name) {
     INode *node = searchForINode(*list, inodeNum);
     // check if given node exists
     if (node == NULL) {
         return 1;
     }
+
+    // if node has more that one name in ts lists, delete only the name from the list
+    if (node->names->head->next != NULL) {
+        deleteName(&node->names, name);
+        return 2;
+    }
+
     // firstly delete all copies directed to given inode
     INode *current = (*list)->head;
 

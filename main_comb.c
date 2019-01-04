@@ -26,11 +26,6 @@ int main(int argc, char const *argv[]) {
     List *sourceINodes = initializeList();
     List *backupINodes = initializeList();
 
-    INode *sourceNode = addINode(&sourceINodes, sourceFilename);
-    INode *backupNode = addINode(&backupINodes, backupFilename);
-    sourceData.inode = sourceNode;
-    backupData.inode = backupNode;
-
     Tree *sourceTree = initializeTree(sourceData);
     Tree *backupTree = initializeTree(backupData);
 
@@ -40,7 +35,7 @@ int main(int argc, char const *argv[]) {
     readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
     readDirectory(backupFilename, &backupINodes, backupTree->root);
     
-    traverseTrees(&sourceTree, &backupTree);
+    traverseTrees(&sourceTree, &backupTree, &sourceINodes, &backupINodes);
 
     // Print structures
     printf("\n\nSource Tree:\n");

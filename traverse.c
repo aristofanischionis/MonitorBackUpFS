@@ -3,9 +3,10 @@
 #include "Headerfiles/defines.h"
 #include "Headerfiles/traverse.h"
 
-void traverseTrees(Tree **sourceTree, Tree **backupTree) {
+void traverseTrees(Tree **sourceTree, Tree **backupTree, List **sourceINodes,
+                   List **backupINodes) {
+    // check case for first kid of roots until they are the same
     while (strcmp((*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name)) {
-        // check case for first kid of roots
         int firstCase = returnCase((*sourceTree)->root->kid, (*backupTree)->root->kid);
         if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) {  
             addKid((*backupTree)->root, (*sourceTree)->root->kid->data);  
@@ -14,39 +15,61 @@ void traverseTrees(Tree **sourceTree, Tree **backupTree) {
             deleteNode(*backupTree, (*backupTree)->root->kid); 
         } 
     }
-    recurseAlgorithm(*sourceTree, *backupTree, (*sourceTree)->root->kid, (*backupTree)->root->kid);   
+    recurseAlgorithm(*backupTree, sourceINodes, backupINodes, (*sourceTree)->root->kid, (*backupTree)->root->kid);
 }
 
-void recurseAlgorithm(Tree *sourceTree, Tree *backupTree,
-                      TreeNode *sourceNode, TreeNode *backupNode) {
+// Traverse both trees at the same time (node by node)
+void recurseAlgorithm(Tree *backupTree, List **sourceINodes,
+                      List **backupINodes, TreeNode *sourceNode,
+                      TreeNode *backupNode) {
     if (sourceNode == NULL && backupNode == NULL) {
         return;
     }
 
     int siblingCase = returnCase(sourceNode->sibling, backupNode->sibling);
-    if (siblingCase == FILE_IN_SOURCE || siblingCase == DIR_IN_SOURCE) {
+    
+    if (siblingCase == FILE_IN_SOURCE) {
         TreeNode *backupSibling = addSiblingSorted(backupNode, sourceNode->sibling->data);
-        recurseAlgorithm(sourceTree, backupTree, sourceNode->sibling, backupSibling);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->sibling, backupSibling);
     } 
-    else if (siblingCase == FILE_IN_BACKUP || siblingCase == DIR_IN_BACKUP) {
+    else if (siblingCase == DIR_IN_SOURCE){
+        TreeNode *backupSibling = addSiblingSorted(backupNode, sourceNode->sibling->data);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->sibling, backupSibling);
+    }
+    else if (siblingCase == FILE_IN_BACKUP) {
         TreeNode * backupPrev = deleteNode(backupTree, backupNode->sibling);
-        recurseAlgorithm(sourceTree, backupTree, sourceNode, backupPrev);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode, backupPrev);
+    }
+    else if (siblingCase == DIR_IN_BACKUP) {
+        TreeNode * backupPrev = deleteNode(backupTree, backupNode->sibling);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode, backupPrev);
     }
     else if (siblingCase == FILE_IN_BOTH) {
-        recurseAlgorithm(sourceTree, backupTree, sourceNode->sibling, backupNode->sibling);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->sibling, backupNode->sibling);
     }  
 
     int kidCase = returnCase(sourceNode->kid, backupNode->kid);
-    if (kidCase == FILE_IN_SOURCE || kidCase == DIR_IN_SOURCE) {
+
+    if (kidCase == FILE_IN_SOURCE ) {
         TreeNode *backupKid = addKid(backupNode, sourceNode->kid->data);  
-        recurseAlgorithm(sourceTree, backupTree, sourceNode->kid, backupKid);   
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->kid, backupKid);   
     }
-    else if (kidCase == FILE_IN_BACKUP || kidCase == DIR_IN_BACKUP) {
+    else if (kidCase == DIR_IN_SOURCE) {
+        TreeNode *backupKid = addKid(backupNode, sourceNode->kid->data);  
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->kid, backupKid); 
+    }
+    else if (kidCase == FILE_IN_BACKUP) {
+        // unlink it in the list of inodes before deleting it from the tree
+        deleteINode(backupINodes, backupNode->kid->data.inode->inodeNum, backupNode->kid->data.name);
         TreeNode * backupPrev = deleteNode(backupTree, backupNode->kid);
-        recurseAlgorithm(sourceTree, backupTree, sourceNode, backupPrev);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode, backupPrev);
     } 
+    else if (kidCase == DIR_IN_BACKUP) {
+        TreeNode * backupPrev = deleteNode(backupTree, backupNode->kid);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode, backupPrev);
+    }
     else if (kidCase == FILE_IN_BOTH) {
-        recurseAlgorithm(sourceTree, backupTree, sourceNode->kid, backupNode->kid);
+        recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->kid, backupNode->kid);
     }  
 }
 
