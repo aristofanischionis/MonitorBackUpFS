@@ -1,6 +1,7 @@
 #include "Headerfiles/inotifyCode.h"
 #include <signal.h>
 #include <unistd.h>
+#include "Headerfiles/list.h"
 
 
 volatile sig_atomic_t running;
@@ -12,6 +13,8 @@ void handle_sigint(int sig)
     running = 0;
    
 }
+
+// take list of inodes
 void handleEvents(int fd, int watched, WDmapping *map)
 {
     char currentName[MAX];
@@ -58,12 +61,12 @@ void handleEvents(int fd, int watched, WDmapping *map)
                 continue;
             }
             
-            if(!strcmp(event_name(event), "unknown event")){
+            if(!strcmp(eventName(event), "unknown event")){
                 // printf("the mask is %x ", event->mask);
                 read_ptr += EVENT_SIZE + event->len;
                 continue;
             }
-            printf("%s: ", event_name(event));
+            printf("%s: ", eventName(event));
 
             /* Print the name of the watched directory */
             for (j = 0; j < watched; j++)
@@ -108,25 +111,17 @@ void fail(const char *message) {
 	perror(message);
 	exit(1);
 }
-const char * target_type(struct inotify_event *event) {
-	if( event->len == 0 )
-		return "";
-	else
-		return event->mask & IN_ISDIR ? "directory" : "file";
-}
 
-const char * target_name(struct inotify_event *event) {
-	return event->len > 0 ? event->name : NULL;
-}
-
-const char *event_name(struct inotify_event *event)
+const char *eventName(struct inotify_event *event)
 {
     if (event->mask & IN_ATTRIB)
         return "attrib";
     else if (event->mask & IN_CLOSE_WRITE)
         return "close write";
-    else if (event->mask & IN_CREATE)
+    else if (event->mask & IN_CREATE){
+        createMode(event);
         return "create";
+    }
     else if (event->mask & IN_DELETE)
         return "delete";
     else if (event->mask & IN_DELETE_SELF)
@@ -147,4 +142,17 @@ void rmWD(WDmapping *map, int watched, int fd){
     for(i = 0; i< watched; i++){
         inotify_rm_watch( fd, map[i].wd );
     }
+}
+
+void createMode(struct inotify_event *event){
+
+    if (event->mask & IN_ISDIR){
+        // printf(" [directory]\n");
+
+    }
+    else {
+        // printf(" [file]\n");
+        searchForINode();
+    }
+
 }

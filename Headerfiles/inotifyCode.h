@@ -19,9 +19,7 @@
 #define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 
 //helper function prototypes
-const char * target_type(struct inotify_event *event) ;
-const char * target_name(struct inotify_event *event);
-const char * event_name(struct inotify_event *event);
+const char * eventName(struct inotify_event *event);
 void fail(const char *message) ;
 void recursiveWatch(char *source, int fd);
 void handleEvents(int fd, int watched, WDmapping *map);

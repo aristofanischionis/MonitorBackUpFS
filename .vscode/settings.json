@@ -5,6 +5,7 @@
         "stdio.h": "c",
         "functions.h": "c",
         "inotify.h": "c",
-        "inotifycode.h": "c"
+        "inotifycode.h": "c",
+        "list.h": "c"
     }
 }
