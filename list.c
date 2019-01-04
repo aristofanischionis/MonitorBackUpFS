@@ -20,7 +20,7 @@ INode * addINode(List **list, char *path) {
     struct stat buf;
     if (stat(path, &buf) == -1) {
         perror("Error using stat");
-        exit(1);
+        return NULL;
     }
     // extract filename from path
     char *filename = basename(path);
@@ -74,6 +74,16 @@ INode * searchForINode(List *list, int inodeNum) {
         current = current->next;
     }
     return NULL;
+}
+
+INode * searchForINodeByPath(List *list, char *path) {
+    struct stat buf;
+    if (stat(path, &buf) == -1) {
+        perror("Error using stat");
+        return NULL;
+    }
+    int inodeNum = (int) buf.st_ino;
+    return searchForINode(list, inodeNum);
 }
 
 // Print all nodes
