@@ -34,8 +34,10 @@ int main(int argc, char const *argv[]) {
     Tree *sourceTree = initializeTree(sourceData);
     Tree *backupTree = initializeTree(backupData);
 
+    // make backup folder if it doesn't exist
+    makeBackup(sourceFilename, backupFilename);
+
     readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
-    // tha diavazei arxeia backup mono otan iparxei idi to backup
     readDirectory(backupFilename, &backupINodes, backupTree->root);
     
     traverseTrees(&sourceTree, &backupTree);
@@ -47,28 +49,11 @@ int main(int argc, char const *argv[]) {
     printf("Backup Tree:\n");
     printTree(backupTree);
     printf("\n");
-    // printf("Source iNodes:\n");
-    // printINodes(sourceINodes);
-    // printf("\n");
-    // printf("Backup iNodes:\n");
-    // printINodes(backupINodes);
-
-
-    // Data dataa;
-    // strcpy(dataa.name, "kati2");
-    
-    // deleteNode(sourceTree, search(sourceTree, dataa));
-    // traverseTrees(&sourceTree, &backupTree);
-    // printf("After delete\n\n");
-    // printf("Source Tree:\n");
-    // printTree(sourceTree);
-    // printf("\n");
-    // printf("Backup Tree:\n");
-    // printTree(backupTree);
-
-
-    // let's make the backup folder
-    // makeBackup(sourceFilename, backupFilename);
+    printf("Source iNodes:\n");
+    printINodes(sourceINodes);
+    printf("\n");
+    printf("Backup iNodes:\n");
+    printINodes(backupINodes);
 
 
     // Free allocated memory
