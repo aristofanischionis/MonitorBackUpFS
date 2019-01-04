@@ -10,9 +10,6 @@
 #include "Headerfiles/functions.h"
 #include "Headerfiles/defines.h"
 
-#define isDIR(X) ((X) == DT_DIR ? (1) : (0))
-#define isREG(X) ((X) == DT_REG ? (1) : (0))
-
 int isDot(char *name)
 {
     return (((!strcmp(name, ".")) || (!strcmp(name, ".."))) ? (1) : (0));

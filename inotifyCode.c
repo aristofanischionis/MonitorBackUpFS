@@ -1,5 +1,5 @@
 #include "Headerfiles/inotifyCode.h"
-
+#include "Headerfiles/functions.h"
 int watched;
 WDmapping map[MAX_WD];
 
@@ -19,10 +19,10 @@ int main(int argc, char *argv[])
 	// monitor root
 	/* Print the name of the file and directory. */
 	//
-	sprintf(map[watched].name, "%s/", argv[1]);
-	printf("Watched is: %d, %s\n", watched,map[watched].name);
+	sprintf(map[watched].name, "%s", argv[1]);
+	printf("Watched is: %d, %s\n", watched, map[watched].name);
 	map[watched].wd = inotify_add_watch(fd, map[watched].name,
-											IN_CREATE |
+										IN_CREATE |
 											IN_MODIFY |
 
 											IN_ATTRIB |
@@ -74,7 +74,7 @@ void recursiveWatch(char *source, int fd)
 	while (1)
 	{
 		struct dirent *entry;
-		const char *d_name;
+		char *d_name;
 
 		/* "Readdir" gets subsequent entries from "d". */
 		entry = readdir(d);
@@ -85,43 +85,31 @@ void recursiveWatch(char *source, int fd)
 			break;
 		}
 		d_name = entry->d_name;
-		//
-		if (entry->d_type & DT_DIR)
-		{
+		// if it is the cur folder or the parent
+		if (isDot(d_name))
+			continue;
+		// if it is a file don't add a wd
+		if (isREG(entry->d_type))
+			continue;
 
-			/* Check if the directory is "d" or d's parent. */
+		sprintf(path, "%s%s/", source, d_name);
 
-			if ((!strcmp(d_name, "..")) || (!strcmp(d_name, ".")))
-			{
-				continue;
-			}
-			// sprintf(path, "%s%s/", source, d_name);
-		}
-		// else {
-		// 	sprintf(path, "%s%s", source, d_name);
-		// }
-		// sprintf(path, "%s/%s", source, d_name);
-		if (entry->d_type & DT_DIR)
-		{
-			sprintf(path, "%s/%s/", source, d_name);
-		}
-		else sprintf(path, "%s/%s", source, d_name);
-		/* Print the name of the file and directory. */
+		/* Print the name of the directory. */
 		printf("Watched is: %d, %s\n", watched, path);
 		//
 		strcpy(map[watched].name, path);
 		map[watched].wd = inotify_add_watch(fd, path,
 											IN_CREATE |
-											IN_MODIFY |
+												IN_MODIFY |
 
-											IN_ATTRIB |
-											IN_CLOSE_WRITE |
+												IN_ATTRIB |
+												IN_CLOSE_WRITE |
 
-											IN_DELETE |
-											IN_DELETE_SELF |
+												IN_DELETE |
+												IN_DELETE_SELF |
 
-											IN_MOVED_FROM |
-											IN_MOVED_TO);
+												IN_MOVED_FROM |
+												IN_MOVED_TO);
 
 		if (map[watched].wd == -1)
 		{
@@ -133,25 +121,8 @@ void recursiveWatch(char *source, int fd)
 		printf("watch added!\n");
 		watched++;
 
-		if (entry->d_type & DT_DIR)
-		{
-		
-				int path_length;
-				char path[MAX];
-
-				path_length = snprintf(path, MAX,
-									   "%s/%s", source, d_name);
-				// printf("2nd time to see that dir so I didn't put a watch here %s\n", path);
-				if (path_length >= MAX)
-				{
-					fprintf(stderr, "Path length has got too long.\n");
-					exit(EXIT_FAILURE);
-				}
-				// add the dir
-				/* Recursively call "recursiveWatch" with the new path. */
-				recursiveWatch(path, fd);
-			
-		}
+		/* Recursively call "recursiveWatch" with the new path. */
+		recursiveWatch(path, fd);
 	}
 	/* After going through all the entries, close the directory. */
 	if (closedir(d))

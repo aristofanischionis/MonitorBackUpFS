@@ -10,11 +10,11 @@ void handle_sigint(int sig)
     signal(SIGINT, handle_sigint);
     printf("Caught signal for program termination\n");
     running = 0;
-    // kill(sig, pidMonitor);
-    // kill(sig, pidPM);
+   
 }
 void handleEvents(int fd, int watched, WDmapping *map)
 {
+    char currentName[MAX];
     running = 1;
     /* Some systems cannot read integer variables if they are not
               properly aligned. On other systems, incorrect alignment may
@@ -31,8 +31,9 @@ void handleEvents(int fd, int watched, WDmapping *map)
 	while (running) {
 		/* read next series of events */
 		length = read(fd, buffer + read_offset, sizeof(buffer) - read_offset);
-		if (length < 0)
-			fail("read");
+		if (length < 0) fail("read");
+
+        if (running == 0) break;
 		length += read_offset; // if there was an offset, add it to the number of bytes to process
 		read_ptr = 0;
 		
@@ -45,21 +46,31 @@ void handleEvents(int fd, int watched, WDmapping *map)
 			// if however the dynamic part exceeds the buffer, 
 			// that means that we cannot fully read all event data and we need to 
 			// deffer processing until next read completes
-			if( read_ptr + EVENT_SIZE + event->len > length ) 
+			if( (read_ptr + EVENT_SIZE + event->len > length) || (running == 0) ) 
 				break;
 			//event is fully received, process
-
-            printf("%s: ", event_name(event));
-            if(!strcmp(event_name(event), "unknown event")){
-                printf("the mask is %x ", event->mask);
+            if (event->len){
+                strcpy(currentName, event->name);
             }
+            // check if it should be ignored
+            if(currentName[0] == '.'){
+                read_ptr += EVENT_SIZE + event->len;
+                continue;
+            }
+            
+            if(!strcmp(event_name(event), "unknown event")){
+                // printf("the mask is %x ", event->mask);
+                read_ptr += EVENT_SIZE + event->len;
+                continue;
+            }
+            printf("%s: ", event_name(event));
 
             /* Print the name of the watched directory */
             for (j = 0; j < watched; j++)
             {
                 if (map[j].wd == event->wd)
                 {
-                    printf("%s", map[j].name);
+                    printf("Name of watched dir is : %s | ", map[j].name);
                     break;
                 }
             }
