@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <limits.h>
 #include "Headerfiles/functions.h"
 #include "Headerfiles/defines.h"
 
@@ -155,43 +156,12 @@ void makeBackup(char *source, char *backup)
     return;
 }
 
-void makeDirectory(char *path, char *name)
-{
-    // pid_t pid;
-    DIR *thisDir;
+void makeDirectory(char *path, char *name) {
+    char buf[MAX];
     char toMake[MAX];
-    printf("Given path in makeDirectory is %s \n", path);
     struct stat st = {0};
-    sprintf(toMake, "/%s%s", path, name);
-    printf("to make is : %s \n", toMake);
+    sprintf(toMake, "%s/%s", realpath(path, buf), name);
     if (stat(toMake, &st) == -1) {
         mkdir(toMake, 0700);
     }
-    // thisDir = opendir(path);
-    /* Check it was opened. */
-    // if (!thisDir)
-    // {
-    //     perror("Cannot open parent directory\n");
-    //     exit(EXIT_FAILURE);
-    // }
-
-    // if ((pid = fork()) == -1)
-    // {
-    //     perror(" fork ");
-    //     exit(EXIT_FAILURE);
-    // }
-    // if (pid == 0)
-    // {
-    //     // child
-    //     char *params[3];
-    //     params[0] = "mkdir";
-    //     params[1] = malloc(MAX * sizeof(char));
-    //     strcpy(params[1], name);
-    //     params[2] = NULL;
-    //     execvp("mkdir", params);
-    // }
-    // else
-    // {
-    //     wait(NULL);
-    // }
 }
