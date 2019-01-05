@@ -1,7 +1,6 @@
 #include "Headerfiles/inotifyCode.h"
 #include <signal.h>
-#include <unistd.h>
-#include "Headerfiles/list.h"
+#include <fcntl.h>
 #include "Headerfiles/functions.h"
 
 
@@ -168,6 +167,8 @@ void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmappin
 
             // call the function to handle the event
             useFunction(event, fd, (*map)[j].name, backup, sourceList, watched, map);
+            // call readdirectories and traverse trees in order to update the logical structures
+
             /* Print type of filesystem object */
 
             if (event->mask & IN_ISDIR)
@@ -252,6 +253,8 @@ void rmWD(WDmapping *map, int watched, int fd){
 void createMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map){
     INode *inode;
     char *backupTo;
+    backupTo = malloc(MAX * sizeof(char));
+    backupTo = backupPath(path, backup);
     if (event->mask & IN_ISDIR){
         // printf(" [directory]\n");
         // create a catalog mkdir in the destination
@@ -259,28 +262,47 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
             printf("event->len <= 0\n");
             exit(EXIT_FAILURE);
         }
+        // making the dir
+        printf("Make dir!\n");
+        makeDirectory(backupTo, event->name);
+        
         // monitor this catalog
         printf("Monitor Dir!\n");
         addWatch(path, fd, event->name, watched, map);
-        printf("Make dir!\n");
-        backupTo = malloc(MAX * sizeof(char));
-        backupTo = backupPath(path, backup);
-        makeDirectory(backupTo, event->name);
-        free(backupTo);
     }
     else {
         // printf(" [file]\n");
+        char oldPath[MAX];
+        char newPath[MAX];
+        // check inode
         inode = searchForINodeByPath(sourceList, path);
-        if (inode->copy != NULL ){
-            //there is a copy already so link it
+        // if(inode == NULL) fail("Inode can't be retrieved properly\n");
+        // make paths
+        sprintf(oldPath, "%s%s", path, event->name);
+        sprintf(newPath, "%s%s", backupTo, event->name);
+        printf("Old path is %s, new path is %s \n", oldPath, newPath);
+        
+        // ---- Haven't tested this if case yet only the else one
+        // check if the copy already exists
+        if ((inode != NULL) &&  (inode->copy != NULL) ){
+            //there is a copy already (which means file created is a hardlink) so link it
             printf("There is already a copy so link it!\n");
+            if ( link (oldPath ,newPath) == -1 ){
+                printf(" Failed to make a new hard link in -> %s, from -> %s \n", newPath, oldPath);
+                exit(1);
+            }
         }
         else {
             // create a new copy to the backup 
             printf("There is not a copy so create it!\n");
+            int fdNewFile;
+            fdNewFile = open(newPath, O_WRONLY | O_CREAT, 0644);
+            close(fdNewFile);
+            // add inode copyy!!!!!
         }
 
     }
+    free(backupTo);
 
 }
 
