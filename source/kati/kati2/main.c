@@ -90,10 +90,8 @@ static void handleEvents(int fd, int *wd, int argc, char *argv[]) {
                   it returns -1 with errno set to EAGAIN. In that case,
                   we exit the loop. */
 
-        if (len <= 0)
-            break;
+  
 
-        /* Loop over all events in the buffer */
 
         for (ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len) {
 

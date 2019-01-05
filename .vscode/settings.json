@@ -6,6 +6,8 @@
         "functions.h": "c",
         "inotify.h": "c",
         "inotifycode.h": "c",
-        "list.h": "c"
+        "list.h": "c",
+        "types.h": "c",
+        "monitoring.h": "c"
     }
 }

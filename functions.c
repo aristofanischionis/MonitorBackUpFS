@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
-#include <sys/wait.h> 
+#include <sys/wait.h>
 #include "Headerfiles/functions.h"
 #include "Headerfiles/defines.h"
 
@@ -15,28 +15,36 @@ int isDot(char *name)
     return (((!strcmp(name, ".")) || (!strcmp(name, ".."))) ? (1) : (0));
 }
 
-void readDirectory(char *filename, List **list, TreeNode *previous) {
+void readDirectory(char *filename, List **list, TreeNode *previous)
+{
     DIR *file_ptr;
     Data data;
     struct dirent *direntp;
     char path[MAX];
-    if ((file_ptr = opendir(filename)) == NULL) {
+    if ((file_ptr = opendir(filename)) == NULL)
+    {
         perror("Cannot open file");
         exit(EXIT_FAILURE);
-    } else {
-        while ((direntp = readdir(file_ptr)) != NULL) {
+    }
+    else
+    {
+        while ((direntp = readdir(file_ptr)) != NULL)
+        {
             sprintf(path, "%s/%s", filename, direntp->d_name);
             strcpy(data.name, direntp->d_name);
             // if this is a file (not a pipe, socket, etc) add an inode
-            if (isREG(direntp->d_type)) {
+            if (isREG(direntp->d_type))
+            {
                 INode *node = addINode(list, path);
                 data.inode = node;
                 addKid(previous, data);
             }
             // check if direntp is a directory
-            if (isDIR(direntp->d_type)) {
+            if (isDIR(direntp->d_type))
+            {
                 // check if it a new directory (not a . or ..)
-                if (!isDot(direntp->d_name)) {
+                if (!isDot(direntp->d_name))
+                {
                     // if it is a new directory add it onnly to the tree
                     // INode *node = addINode(list, path);
                     // data.inode = node;
@@ -49,15 +57,17 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     }
 }
 
-void makeBackup(char *source, char *backup) {
+void makeBackup(char *source, char *backup)
+{
     pid_t cp_pid;
     DIR *ds, *db;
     /* Open the directory specified by "source". */
 
     ds = opendir(source);
     /* Check it was opened. */
-    if (!ds) {
-        perror("Cannot open directory source\n");
+    if (!ds)
+    {
+        perror("Cannot open directory source in Backup\n");
         exit(EXIT_FAILURE);
     }
 
@@ -65,13 +75,16 @@ void makeBackup(char *source, char *backup) {
 
     db = opendir(backup);
     /* Check it was opened. */
-    if (!db) {
+    if (!db)
+    {
         printf("Backup doesn't exist yet!\n");
-        if ((cp_pid = fork()) == -1) {
+        if ((cp_pid = fork()) == -1)
+        {
             perror(" fork ");
             exit(EXIT_FAILURE);
         }
-        if (cp_pid == 0) {
+        if (cp_pid == 0)
+        {
             // child
             char *params[5];
             params[0] = "cp";
@@ -82,17 +95,23 @@ void makeBackup(char *source, char *backup) {
             sprintf(params[3], "%s/", backup);
             params[4] = NULL;
             execvp("cp", params);
-        } else {
+        }
+        else
+        {
             wait(NULL);
         }
-    } else {
+    }
+    else
+    {
         printf("Backup exists already!\n");
         // so first delete it
-        if ((cp_pid = fork()) == -1) {
+        if ((cp_pid = fork()) == -1)
+        {
             perror(" fork ");
             exit(EXIT_FAILURE);
         }
-        if (cp_pid == 0) {
+        if (cp_pid == 0)
+        {
             // child
             char *params[4];
             params[0] = "rm";
@@ -101,16 +120,20 @@ void makeBackup(char *source, char *backup) {
             strcpy(params[2], backup);
             params[3] = NULL;
             execvp("rm", params);
-        } else {
+        }
+        else
+        {
             wait(NULL);
         }
         // now that it is deleted let's cp the source to it
 
-        if ((cp_pid = fork()) == -1) {
+        if ((cp_pid = fork()) == -1)
+        {
             perror(" fork ");
             exit(EXIT_FAILURE);
         }
-        if (cp_pid == 0) {
+        if (cp_pid == 0)
+        {
             // child
             char *params[5];
             params[0] = "cp";
@@ -121,11 +144,54 @@ void makeBackup(char *source, char *backup) {
             sprintf(params[3], "%s/", backup);
             params[4] = NULL;
             execvp("cp", params);
-        } else {
+        }
+        else
+        {
             wait(NULL);
         }
     }
     closedir(ds);
     closedir(db);
     return;
+}
+
+void makeDirectory(char *path, char *name)
+{
+    // pid_t pid;
+    DIR *thisDir;
+    char toMake[MAX];
+    printf("Given path in makeDirectory is %s \n", path);
+    struct stat st = {0};
+    sprintf(toMake, "/%s%s", path, name);
+    printf("to make is : %s \n", toMake);
+    if (stat(toMake, &st) == -1) {
+        mkdir(toMake, 0700);
+    }
+    // thisDir = opendir(path);
+    /* Check it was opened. */
+    // if (!thisDir)
+    // {
+    //     perror("Cannot open parent directory\n");
+    //     exit(EXIT_FAILURE);
+    // }
+
+    // if ((pid = fork()) == -1)
+    // {
+    //     perror(" fork ");
+    //     exit(EXIT_FAILURE);
+    // }
+    // if (pid == 0)
+    // {
+    //     // child
+    //     char *params[3];
+    //     params[0] = "mkdir";
+    //     params[1] = malloc(MAX * sizeof(char));
+    //     strcpy(params[1], name);
+    //     params[2] = NULL;
+    //     execvp("mkdir", params);
+    // }
+    // else
+    // {
+    //     wait(NULL);
+    // }
 }

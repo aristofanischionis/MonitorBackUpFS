@@ -1,13 +1,14 @@
 #include "Headerfiles/inotifyCode.h"
 #include "Headerfiles/functions.h"
-int watched;
-WDmapping map[MAX_WD];
 
-int main(int argc, char *argv[])
+int inotifyCode(char *source, char *backup, List *sourceINodes)
 {
+	int watched;
+	int i;
+	WDmapping *map;
 	int fd; // descriptors returned from inotify subsystem
-	if (argc < 2)
-		fail("Must specify path(s) to watch");
+	if (!strcmp(source, ""))
+		fail("Must specify path to watch");
 
 	/*creating the INOTIFY instance*/
 	fd = inotify_init();
@@ -15,13 +16,15 @@ int main(int argc, char *argv[])
 		fail("inotify_init");
 
 	watched = 0;
-
+	map = (WDmapping*)malloc(MAX_WD*sizeof(WDmapping));
 	// monitor root
-	/* Print the name of the file and directory. */
+
+	/* Print the name of the directory. */
+	printf("Watched is: %d, %s\n", watched, source);
 	//
-	sprintf(map[watched].name, "%s", argv[1]);
-	printf("Watched is: %d, %s\n", watched, map[watched].name);
-	map[watched].wd = inotify_add_watch(fd, map[watched].name,
+
+	strcpy(map[watched].name, source);
+	map[watched].wd = inotify_add_watch(fd, source,
 										IN_CREATE |
 											IN_MODIFY |
 
@@ -36,99 +39,26 @@ int main(int argc, char *argv[])
 
 	if (map[watched].wd == -1)
 	{
-		fprintf(stderr, "Cannot watch '%s'\n", map[watched].name);
+		fprintf(stderr, "Cannot watch '%s'\n", source);
 		perror("inotify_add_watch");
 		watched--;
 		exit(EXIT_FAILURE);
 	}
 	printf("watch added!\n");
 	watched++;
+	
 	//
-	recursiveWatch(argv[1], fd);
+	recursiveWatch(map[0].name, fd, &watched, &map);
 
 	if (watched == 0)
 		fail("Nothing to watch!");
 
 	printf("Listening for events!\n");
 
-	handleEvents(fd, watched, map);
+	handleEvents(fd, backup, sourceINodes, &watched, &map);
 
 	printf("I stopped listening for events!\n");
 	rmWD(map, watched, fd);
 	close(fd);
-}
-
-void recursiveWatch(char *source, int fd)
-{
-	DIR *d;
-	char path[MAX];
-	/* Open the directory specified by "source". */
-
-	d = opendir(source);
-	/* Check it was opened. */
-	if (!d)
-	{
-		fail("Cannot open directory source\n");
-	}
-
-	while (1)
-	{
-		struct dirent *entry;
-		char *d_name;
-
-		/* "Readdir" gets subsequent entries from "d". */
-		entry = readdir(d);
-		if (!entry)
-		{
-			/* There are no more entries in this directory, so break
-               out of the while loop. */
-			break;
-		}
-		d_name = entry->d_name;
-		// if it is the cur folder or the parent
-		if (isDot(d_name))
-			continue;
-		// if it is a file don't add a wd
-		if (isREG(entry->d_type))
-			continue;
-
-		sprintf(path, "%s%s/", source, d_name);
-
-		/* Print the name of the directory. */
-		printf("Watched is: %d, %s\n", watched, path);
-		//
-		strcpy(map[watched].name, path);
-		map[watched].wd = inotify_add_watch(fd, path,
-											IN_CREATE |
-												IN_MODIFY |
-
-												IN_ATTRIB |
-												IN_CLOSE_WRITE |
-
-												IN_DELETE |
-												IN_DELETE_SELF |
-
-												IN_MOVED_FROM |
-												IN_MOVED_TO);
-
-		if (map[watched].wd == -1)
-		{
-			fprintf(stderr, "Cannot watch '%s'\n", path);
-			perror("inotify_add_watch");
-			watched--;
-			exit(EXIT_FAILURE);
-		}
-		printf("watch added!\n");
-		watched++;
-
-		/* Recursively call "recursiveWatch" with the new path. */
-		recursiveWatch(path, fd);
-	}
-	/* After going through all the entries, close the directory. */
-	if (closedir(d))
-	{
-		fprintf(stderr, "Could not close '%s': %s\n",
-				source, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	free(map);
 }

@@ -6,6 +6,7 @@
 #include "Headerfiles/functions.h"
 #include "Headerfiles/list.h"
 #include "Headerfiles/traverse.h"
+#include "Headerfiles/inotifyCode.h"
 
 int main(int argc, char const *argv[]) {
 
@@ -50,6 +51,9 @@ int main(int argc, char const *argv[]) {
     printf("Backup iNodes:\n");
     printINodes(backupINodes);
 
+    /////////////////////////   BIG TEST///////////////////////
+
+    inotifyCode(sourceFilename, backupFilename, sourceINodes);
 
     // Free allocated memory
     deleteNode(sourceTree, sourceTree->root);
