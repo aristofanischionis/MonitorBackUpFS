@@ -107,7 +107,7 @@ void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmappin
               decrease performance. Hence, the buffer used for reading from
               the inotify file descriptor should have the same alignment as
               struct inotify_event. */
-    signal(SIGINT, handle_sigint);
+    // signal(SIGINT, handle_sigint);
 
     int length, read_ptr, read_offset, j; //management of variable length events
 	char buffer[EVENT_BUF_LEN];	//the buffer to use for reading the events
@@ -233,8 +233,9 @@ void useFunction(struct inotify_event *event, int fd, char* path, char* backup, 
         return;
     else if (event->mask & IN_DELETE_SELF)
         return;
-    else if (event->mask & IN_MODIFY)
-        return;
+    else if (event->mask & IN_MODIFY){
+        modifyMode(event, fd, path, backup, list, watched, map);
+    }
     else if (event->mask & IN_MOVED_FROM)
         return;
     else if (event->mask & IN_MOVED_TO)
@@ -389,4 +390,8 @@ void attribMode(struct inotify_event *event, int fd, char* path, char* backup, L
     free(bPath);
     // free(modDate);
     // free(lastModTime);
+}
+
+void modifyMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map){
+
 }

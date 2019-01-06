@@ -30,6 +30,7 @@ void useFunction(struct inotify_event *event, int fd, char* path, char* backup, 
 void createMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
 char* backupPath(char* sourcePath, char* backupBase);
 void attribMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
+void modifyMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
 void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmapping** map);
 void rmWD(WDmapping *map, int watched, int fd);
 int inotifyCode(char* source, char* backup, List* sourceINodes);
