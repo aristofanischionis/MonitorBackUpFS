@@ -42,6 +42,7 @@ INode * addINode(List **list, char *path) {
     newNode->names = initializeNameList();
     addName(&newNode->names, filename);
     newNode->nameCount = 1;
+    newNode->modified = 0;
     newNode->copy = NULL;
     newNode->next = (*list)->head;
     // Change head pointer as new node is added at the beginning
