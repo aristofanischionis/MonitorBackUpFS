@@ -37,7 +37,7 @@ INode * addINode(List **list, char *path) {
 
     INode *newNode = (INode *)malloc(sizeof(INode));
     newNode->inodeNum = (int) buf.st_ino;
-    newNode->modDate = buf.st_mtime;
+    newNode->modDate = buf.st_ctime;
     newNode->size = buf.st_size;
     newNode->names = initializeNameList();
     addName(&newNode->names, filename);

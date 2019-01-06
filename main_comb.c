@@ -31,7 +31,7 @@ int main(int argc, char const *argv[]) {
     Tree *backupTree = initializeTree(backupData);
 
     // make backup folder if it doesn't exist
-    // makeBackup(sourceFilename, backupFilename);
+    makeBackup(sourceFilename, backupFilename);
 
     readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
     readDirectory(backupFilename, &backupINodes, backupTree->root);
@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]) {
 
     /////////////////////////   BIG TEST///////////////////////
 
-    // inotifyCode(sourceFilename, backupFilename, sourceINodes);
+    inotifyCode(sourceFilename, backupFilename, sourceINodes);
 
     // Free allocated memory
     deleteNode(sourceTree, sourceTree->root);
