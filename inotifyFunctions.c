@@ -284,24 +284,3 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
 
 }
 
-char* backupPath(char* sourcePath, char* backupBase){
-    const char s[2] = "/";
-    char *token;
-    char toCopy[100];
-    char *source, *backup;
-    source = malloc(MAX * sizeof(char));
-    backup = malloc(MAX * sizeof(char));
-    strcpy(source, sourcePath);
-    strcpy(backup, backupBase);
-
-    token = strtok(source, s);
-
-    while( token != NULL ) {
-        token = strtok(NULL, s);
-        if(token == NULL) break;
-        sprintf(toCopy, "%s/", token);
-        strcat(backup, toCopy);
-    }
-    printf("Backup path is : %s \n", backup);
-    return backup;
-}

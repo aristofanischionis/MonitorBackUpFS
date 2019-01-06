@@ -15,10 +15,11 @@ List * initializeList(void) {
     return list;
 }
 
-// Add a node to the beginning of the list
+// Add a node to the beginning of the list, if it already exists add name to its nameList
 INode * addINode(List **list, char *path) {
     struct stat buf;
     if (stat(path, &buf) == -1) {
+        printf("wrong path %s\n", path);
         perror("Error using stat");
         return NULL;
     }

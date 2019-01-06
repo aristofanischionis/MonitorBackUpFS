@@ -27,7 +27,6 @@ void recursiveWatch(char *source, int fd, int *watched, WDmapping** map);
 void addWatch(char *source, int fd, char* d_name, int *watched, WDmapping** map);
 void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* list, int *watched, WDmapping** map);
 void createMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
-char* backupPath(char* sourcePath, char* backupBase);
 void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmapping** map);
 void rmWD(WDmapping *map, int watched, int fd);
 int inotifyCode(char* source, char* backup, List* sourceINodes);

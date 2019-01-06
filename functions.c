@@ -33,6 +33,8 @@ void readDirectory(char *filename, List **list, TreeNode *previous)
         {
             sprintf(path, "%s/%s", filename, direntp->d_name);
             strcpy(data.name, direntp->d_name);
+            strcpy(data.path, path);
+            // if this is a file (not a pipe, socket, etc) add an inode
             // if this is a file (not a pipe, socket, etc) add an inode
             if (isREG(direntp->d_type))
             {
@@ -46,7 +48,7 @@ void readDirectory(char *filename, List **list, TreeNode *previous)
                 // check if it a new directory (not a . or ..)
                 if (!isDot(direntp->d_name))
                 {
-                    // if it is a new directory add it onnly to the tree
+                    // if it is a new directory add it only to the tree
                     // INode *node = addINode(list, path);
                     // data.inode = node;
                     TreeNode *treenode = addKid(previous, data);
@@ -164,4 +166,27 @@ void makeDirectory(char *path, char *name) {
     if (stat(toMake, &st) == -1) {
         mkdir(toMake, 0700);
     }
+}
+
+// Make an identical path to sourcePath, but with backupBase as the root
+char* backupPath(char* sourcePath, char* backupBase){
+    const char s[2] = "/";
+    char *token;
+    char toCopy[100];
+    char *source, *backup;
+    source = malloc(MAX * sizeof(char));
+    backup = malloc(MAX * sizeof(char));
+    strcpy(source, sourcePath);
+    strcpy(backup, backupBase);
+
+    token = strtok(source, s);
+
+    while( token != NULL ) {
+        token = strtok(NULL, s);
+        if(token == NULL) break;
+        sprintf(toCopy, "%s/", token);
+        strcat(backup, toCopy);
+    }
+    printf("Backup path is : %s \n", backup);
+    return backup;
 }

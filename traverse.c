@@ -1,19 +1,25 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "Headerfiles/defines.h"
 #include "Headerfiles/traverse.h"
+#include "Headerfiles/functions.h"
 
 void traverseTrees(Tree **sourceTree, Tree **backupTree, List **sourceINodes,
                    List **backupINodes) {
-    // check case for first kid of roots until they are the same
-    while (strcmp((*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name)) {
-        int firstCase = returnCase((*sourceTree)->root->kid, (*backupTree)->root->kid);
-        if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) {  
-            addKid((*backupTree)->root, (*sourceTree)->root->kid->data);  
+    // if source has at least one file/dir (which means that backup will have it
+    // too because it is copied), check case for first kid of roots until they
+    // are the same
+    if ((*sourceTree)->root->kid != NULL) {
+        while (strcmp((*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name)) {
+            int firstCase = returnCase((*sourceTree)->root->kid, (*backupTree)->root->kid);
+            if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) {  
+                addKid((*backupTree)->root, (*sourceTree)->root->kid->data);  
+            }
+            else if (firstCase == FILE_IN_BACKUP || firstCase == DIR_IN_BACKUP) {
+                deleteNode(*backupTree, (*backupTree)->root->kid); 
+            } 
         }
-        else if (firstCase == FILE_IN_BACKUP || firstCase == DIR_IN_BACKUP) {
-            deleteNode(*backupTree, (*backupTree)->root->kid); 
-        } 
     }
     recurseAlgorithm(*backupTree, sourceINodes, backupINodes, (*sourceTree)->root->kid, (*backupTree)->root->kid);
 }
@@ -30,6 +36,10 @@ void recurseAlgorithm(Tree *backupTree, List **sourceINodes,
     
     if (siblingCase == FILE_IN_SOURCE) {
         TreeNode *backupSibling = addSiblingSorted(backupNode, sourceNode->sibling->data);
+        // make backup path same as source but with different root folder
+        char *path = backupPath(sourceNode->sibling->data.path, backupTree->root->data.name); 
+        // link it in the list of inodes after creating it
+        backupSibling->data.inode = addINode(backupINodes, path);  
         recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->sibling, backupSibling);
     } 
     else if (siblingCase == DIR_IN_SOURCE){
@@ -51,7 +61,11 @@ void recurseAlgorithm(Tree *backupTree, List **sourceINodes,
     int kidCase = returnCase(sourceNode->kid, backupNode->kid);
 
     if (kidCase == FILE_IN_SOURCE ) {
-        TreeNode *backupKid = addKid(backupNode, sourceNode->kid->data);  
+        TreeNode *backupKid = addKid(backupNode, sourceNode->kid->data); 
+        // make backup path same as source but with different root folder
+        char *path = backupPath(sourceNode->kid->data.path, backupTree->root->data.name); 
+        // link it in the list of inodes after creating it
+        backupKid->data.inode = addINode(backupINodes, path); 
         recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->kid, backupKid);   
     }
     else if (kidCase == DIR_IN_SOURCE) {
