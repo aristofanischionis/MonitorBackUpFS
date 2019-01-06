@@ -28,7 +28,6 @@ void recursiveWatch(char *source, int fd, int *watched, WDmapping** map);
 void addWatch(char *source, int fd, char* d_name, int *watched, WDmapping** map);
 void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* list, int *watched, WDmapping** map);
 void createMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
-char* backupPath(char* sourcePath, char* backupBase);
 void attribMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
 void modifyMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
 void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmapping** map);

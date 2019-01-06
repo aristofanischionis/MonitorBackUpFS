@@ -7,6 +7,7 @@
 
 typedef struct Data {
     char name[MAX];
+    char path[MAX];
     INode *inode;
 } Data;
 

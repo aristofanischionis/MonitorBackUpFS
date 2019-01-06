@@ -11,6 +11,7 @@ typedef struct INode {
     off_t size;
     NameList *names;
     int nameCount;
+    int modified;
     struct INode *copy;    // only for files in source
     struct INode *next;
 } INode;

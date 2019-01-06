@@ -13,6 +13,7 @@ int isDot(char *name);
 void readDirectory(char *filename, List **list, TreeNode *previous);
 void makeBackup(char *source, char *backup);
 void makeDirectory(char *path, char *name);
+char* backupPath(char* sourcePath, char* backupBase);
 void copy(char *source, char *dest);
 
 #endif
