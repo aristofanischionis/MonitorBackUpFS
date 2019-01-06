@@ -79,77 +79,15 @@ void makeBackup(char *source, char *backup)
     if (!db)
     {
         printf("Backup doesn't exist yet!\n");
-        if ((cp_pid = fork()) == -1)
-        {
-            perror(" fork ");
-            exit(EXIT_FAILURE);
-        }
-        if (cp_pid == 0)
-        {
-            // child
-            char *params[5];
-            params[0] = "cp";
-            params[1] = "-a";
-            params[2] = malloc(MAX * sizeof(char));
-            strcpy(params[2], source);
-            params[3] = malloc(MAX * sizeof(char));
-            sprintf(params[3], "%s/", backup);
-            params[4] = NULL;
-            execvp("cp", params);
-        }
-        else
-        {
-            wait(NULL);
-        }
+        copy(source, backup);
     }
     else
     {
         printf("Backup exists already!\n");
         // so first delete it
-        if ((cp_pid = fork()) == -1)
-        {
-            perror(" fork ");
-            exit(EXIT_FAILURE);
-        }
-        if (cp_pid == 0)
-        {
-            // child
-            char *params[4];
-            params[0] = "rm";
-            params[1] = "-rf";
-            params[2] = malloc(MAX * sizeof(char));
-            strcpy(params[2], backup);
-            params[3] = NULL;
-            execvp("rm", params);
-        }
-        else
-        {
-            wait(NULL);
-        }
+        remove(backup);
         // now that it is deleted let's cp the source to it
-
-        if ((cp_pid = fork()) == -1)
-        {
-            perror(" fork ");
-            exit(EXIT_FAILURE);
-        }
-        if (cp_pid == 0)
-        {
-            // child
-            char *params[5];
-            params[0] = "cp";
-            params[1] = "-a";
-            params[2] = malloc(MAX * sizeof(char));
-            strcpy(params[2], source);
-            params[3] = malloc(MAX * sizeof(char));
-            sprintf(params[3], "%s/", backup);
-            params[4] = NULL;
-            execvp("cp", params);
-        }
-        else
-        {
-            wait(NULL);
-        }
+        copy(source, backup);
     }
     closedir(ds);
     closedir(db);
@@ -165,3 +103,51 @@ void makeDirectory(char *path, char *name) {
         mkdir(toMake, 0700);
     }
 }
+
+void copy(char *source, char *dest)
+{
+    int childExitStatus;
+    pid_t pid;
+    int status;
+    if (!source || !dest) {
+        /* handle as you wish */
+        perror("Source or Destination in copy is not specified\n");
+        exit(1);
+    }
+
+    pid = fork();
+
+    if (pid == 0) { /* child */
+        execl("/bin/cp", "/bin/cp", "-a", source, dest, (char *)0);
+    }
+    else if (pid < 0) {
+        /* error - couldn't start process - you decide how to handle */
+        perror("pid<0 in copy\n");
+        exit(1);
+    }
+    else {
+        /* parent - wait for child - this has all error handling, you
+         * could just call wait() as long as you are only expecting to
+         * have one child process at a time.
+         */
+        pid_t ws = waitpid( pid, &childExitStatus, WNOHANG);
+        if (ws == -1)
+        { /* error - handle as you wish */
+            perror("waitpid error in copy\n");
+            exit(1);
+        }
+
+        // if( WIFEXITED(childExitStatus)) /* exit code in childExitStatus */
+        // {
+        //     status = WEXITSTATUS(childExitStatus); /* zero is normal exit */
+        //     /* handle non-zero as you wish */
+        // }
+        // else if (WIFSIGNALED(childExitStatus)) /* killed */
+        // {
+        // }
+        // else if (WIFSTOPPED(childExitStatus)) /* stopped */
+        // {
+        // }
+    }
+}
+

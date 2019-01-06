@@ -221,8 +221,9 @@ const char *eventName(struct inotify_event *event)
 }
 
 void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* list, int *watched, WDmapping** map){
-    if (event->mask & IN_ATTRIB)
-        return;
+    if (event->mask & IN_ATTRIB){
+        attribMode(event, fd, path, backup, list, watched, map);
+    }
     else if (event->mask & IN_CLOSE_WRITE)
         return;
     else if (event->mask & IN_CREATE){
@@ -274,14 +275,15 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
         // printf(" [file]\n");
         char oldPath[MAX];
         char newPath[MAX];
-        // check inode
-        inode = searchForINodeByPath(sourceList, path);
-        // if(inode == NULL) fail("Inode can't be retrieved properly\n");
+        
         // make paths
         sprintf(oldPath, "%s%s", path, event->name);
         sprintf(newPath, "%s%s", backupTo, event->name);
         printf("Old path is %s, new path is %s \n", oldPath, newPath);
-        
+        ///
+        // check inode
+        inode = searchForINodeByPath(sourceList, oldPath);
+        // if(inode == NULL) fail("Inode can't be retrieved properly\n");
         // ---- Haven't tested this if case yet only the else one
         // check if the copy already exists
         if ((inode != NULL) &&  (inode->copy != NULL) ){
@@ -326,4 +328,65 @@ char* backupPath(char* sourcePath, char* backupBase){
     }
     printf("Backup path is : %s \n", backup);
     return backup;
+}
+
+void attribMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map){
+    struct stat statbuf;
+    INode* inode;
+    char buf[MAX];
+    char fullPath[MAX];
+    char* bPath;
+    // char* lastModTime;
+    // char* modDate;
+    // //
+    // lastModTime = malloc(1024 * sizeof(char));
+    // modDate = malloc(1024 * sizeof(char));
+    //
+    sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
+    bPath = malloc(MAX * sizeof(char));
+    bPath = backupPath(path, backup);
+    sprintf(bPath, "%s%s", bPath, event->name);
+    // 
+    if (!(event->mask & IN_ISDIR)){
+        // if it is a file
+        printf("it is a file in attribMode %s\n", fullPath);
+        if ( stat ( fullPath , & statbuf ) == -1){
+            perror (" Failed to get file status \n");
+            exit(1);
+        }
+        printf (" ctime : %s\n" , ctime(&statbuf.st_ctime));
+        // strcpy(lastModTime, ctime(&inode->modDate)); 
+        //
+        // printf("------------> fullpath is %s \n", fullPath);
+        inode = searchForINodeByPath(sourceList, fullPath);
+        if(inode == NULL){
+            perror("inode is null\n");
+            exit(1);
+        }
+        if(!inode->modDate){
+            perror("inode mod data is null\n");
+        }
+        else {
+            printf(" inode time : %s\n", ctime(&inode->modDate));
+            // strcpy(modDate, ctime(&inode->modDate)); 
+        }
+        // !strcmp(lastModTime, modDate)
+        double seconds = difftime(statbuf.st_ctime, inode->modDate);
+        if (seconds > 0) {
+            // update the replica
+            printf("update the replica\n");
+            // update the moddate
+            inode->modDate = statbuf.st_ctime;
+            // rm old file from backup
+            printf("I will remove %s \n", bPath);
+            remove(bPath);
+            // cp file from source to backup
+            printf("I will make %s \n", bPath);
+            copy(fullPath, bPath);
+        }
+        
+    }
+    free(bPath);
+    // free(modDate);
+    // free(lastModTime);
 }
