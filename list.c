@@ -27,7 +27,7 @@ INode * addINode(List **list, char *path) {
     char *filename = basename(path);
 
     INode *node = searchForINode(*list, (int) buf.st_ino);
-    // check if given node exists
+    // check if given node exists (which means that the path is a hardlink)
     if (node != NULL) {
         // if inode already exists then add path name to its nameList and increase counter
         addName(&node->names, filename);

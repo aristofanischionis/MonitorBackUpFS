@@ -40,6 +40,9 @@ void recurseAlgorithm(Tree *backupTree, List **sourceINodes,
         char *path = backupPath(sourceNode->sibling->data.path, backupTree->root->data.name); 
         // link it in the list of inodes after creating it
         backupSibling->data.inode = addINode(backupINodes, path);  
+        strcpy(backupSibling->data.path, path); 
+        // make copy pointer of source node point to backup
+        sourceNode->sibling->data.inode->copy = backupSibling->data.inode;
         recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->sibling, backupSibling);
     } 
     else if (siblingCase == DIR_IN_SOURCE){
@@ -66,6 +69,9 @@ void recurseAlgorithm(Tree *backupTree, List **sourceINodes,
         char *path = backupPath(sourceNode->kid->data.path, backupTree->root->data.name); 
         // link it in the list of inodes after creating it
         backupKid->data.inode = addINode(backupINodes, path); 
+        strcpy(backupKid->data.path, path); 
+        // make copy pointer of source node point to backup
+        sourceNode->kid->data.inode->copy = backupKid->data.inode;
         recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->kid, backupKid);   
     }
     else if (kidCase == DIR_IN_SOURCE) {
@@ -83,6 +89,13 @@ void recurseAlgorithm(Tree *backupTree, List **sourceINodes,
         recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode, backupPrev);
     }
     else if (kidCase == FILE_IN_BOTH) {
+        // if file has been modified update backup inode struct info
+        if (sourceNode->kid->data.inode->modDate != backupNode->kid->data.inode->modDate ||
+        sourceNode->kid->data.inode->size != backupNode->kid->data.inode->size) {
+            backupNode->kid->data.inode->modDate = sourceNode->kid->data.inode->modDate;
+            backupNode->kid->data.inode->size = sourceNode->kid->data.inode->size;
+            backupNode->kid->data.inode->modified = 1;
+        }
         recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->kid, backupNode->kid);
     }  
 }
