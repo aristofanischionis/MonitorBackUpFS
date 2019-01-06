@@ -107,7 +107,7 @@ void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmappin
               decrease performance. Hence, the buffer used for reading from
               the inotify file descriptor should have the same alignment as
               struct inotify_event. */
-    signal(SIGINT, handle_sigint);
+    // signal(SIGINT, handle_sigint);
 
     int length, read_ptr, read_offset, j; //management of variable length events
 	char buffer[EVENT_BUF_LEN];	//the buffer to use for reading the events
@@ -222,10 +222,11 @@ const char *eventName(struct inotify_event *event)
 
 void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* list, int *watched, WDmapping** map){
     if (event->mask & IN_ATTRIB){
-        attribMode(event, fd, path, backup, list, watched, map);
+        attribMode(event, path, backup, list);
     }
-    else if (event->mask & IN_CLOSE_WRITE)
-        return;
+    else if (event->mask & IN_CLOSE_WRITE){
+        closeWriteMode(event, path, backup, list);
+    }
     else if (event->mask & IN_CREATE){
         createMode(event, fd, path, backup, list, watched, map);
     }
@@ -233,8 +234,9 @@ void useFunction(struct inotify_event *event, int fd, char* path, char* backup, 
         return;
     else if (event->mask & IN_DELETE_SELF)
         return;
-    else if (event->mask & IN_MODIFY)
-        return;
+    else if (event->mask & IN_MODIFY){
+        modifyMode(event, path, list);
+    }
     else if (event->mask & IN_MOVED_FROM)
         return;
     else if (event->mask & IN_MOVED_TO)
@@ -308,18 +310,12 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
 
 }
 
-void attribMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map){
+void attribMode(struct inotify_event *event, char* path, char* backup, List* sourceList){
     struct stat statbuf;
     INode* inode;
     char buf[MAX];
     char fullPath[MAX];
     char* bPath;
-    // char* lastModTime;
-    // char* modDate;
-    // //
-    // lastModTime = malloc(1024 * sizeof(char));
-    // modDate = malloc(1024 * sizeof(char));
-    //
     sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
     bPath = malloc(MAX * sizeof(char));
     bPath = backupPath(path, backup);
@@ -333,22 +329,20 @@ void attribMode(struct inotify_event *event, int fd, char* path, char* backup, L
             exit(1);
         }
         printf (" ctime : %s\n" , ctime(&statbuf.st_ctime));
-        // strcpy(lastModTime, ctime(&inode->modDate)); 
         //
         // printf("------------> fullpath is %s \n", fullPath);
         inode = searchForINodeByPath(sourceList, fullPath);
         if(inode == NULL){
             perror("inode is null\n");
-            exit(1);
+            perror("make sure that you have called add inode after file creation\n");
+            // exit(1);
         }
         if(!inode->modDate){
             perror("inode mod data is null\n");
         }
         else {
             printf(" inode time : %s\n", ctime(&inode->modDate));
-            // strcpy(modDate, ctime(&inode->modDate)); 
         }
-        // !strcmp(lastModTime, modDate)
         double seconds = difftime(statbuf.st_ctime, inode->modDate);
         if (seconds > 0) {
             // update the replica
@@ -365,6 +359,58 @@ void attribMode(struct inotify_event *event, int fd, char* path, char* backup, L
         
     }
     free(bPath);
-    // free(modDate);
-    // free(lastModTime);
+}
+
+void modifyMode(struct inotify_event *event, char* path, List* sourceList){
+    char fullPath[MAX];
+    struct stat statbuf;
+    INode* inode;
+    char buf[MAX];
+    sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
+    if (!(event->mask & IN_ISDIR)){
+        // if it is a file
+        printf("it is a file in modifyMode %s\n", fullPath);
+        inode = searchForINodeByPath(sourceList, fullPath);
+        if(inode == NULL){
+            perror("inode is null\n");
+            exit(1);
+        }
+        // mark it as modified
+        inode->modified = 1;
+    }
+}
+
+void closeWriteMode(struct inotify_event *event, char* path, char* backup, List* sourceList){
+    char fullPath[MAX];
+    struct stat statbuf;
+    INode* inode;
+    char buf[MAX];
+    char* bPath;
+    bPath = malloc(MAX * sizeof(char));
+    bPath = backupPath(path, backup);
+    //
+    sprintf(bPath, "%s%s", bPath, event->name);
+    sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
+    if (!(event->mask & IN_ISDIR)){
+        // if it is a file
+        printf("it is a file in closeWriteMode %s\n", fullPath);
+        inode = searchForINodeByPath(sourceList, fullPath);
+        if(inode == NULL){
+            perror("inode is null\n");
+            exit(1);
+        }
+        // if it is marked as modified
+        if(inode->modified == 1){
+            // copy it
+            // rm old file from backup first
+            printf("I will remove %s \n", bPath);
+            remove(bPath);
+            // cp file from source to backup
+            printf("I will make %s \n", bPath);
+            copy(fullPath, bPath);
+            // it is not modified any more
+            inode->modified = 0;
+        }
+    }
+    free(bPath);
 }

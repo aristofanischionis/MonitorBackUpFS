@@ -1,7 +1,7 @@
 #ifndef DEFINES_HEADER
 #define DEFINES_HEADER
 
-#define MAX 300
+#define MAX 4096
 #define MAX_WD 4096
 
 
