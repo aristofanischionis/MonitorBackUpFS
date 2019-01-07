@@ -21,10 +21,21 @@ int main(int argc, char const *argv[]) {
     strcpy(backupFilename, argv[2]);
 
     Data sourceData, backupData;
-    strcpy(sourceData.name, sourceFilename);
-    strcpy(backupData.name, backupFilename);
-    strcpy(sourceData.path, sourceFilename);
-    strcpy(backupData.path, backupFilename);
+    // remove '\' character if it exists at the end of the filenames
+    char *sourceFileCopy = malloc(strlen(sourceFilename)+1);
+    strcpy(sourceFileCopy, sourceFilename);
+    char *backupFileCopy = malloc(strlen(backupFilename)+1);
+    strcpy(backupFileCopy, backupFilename);
+    if (sourceFileCopy[strlen(sourceFileCopy)-1] == '/') {
+        sourceFileCopy[strlen(sourceFileCopy)-1] = 0;
+    }
+    if (backupFileCopy[strlen(backupFileCopy)-1] == '/') {
+        backupFileCopy[strlen(backupFileCopy)-1] = 0;
+    }
+    strcpy(sourceData.name, sourceFileCopy);
+    strcpy(backupData.name, backupFileCopy);
+    strcpy(sourceData.path, sourceFileCopy);
+    strcpy(backupData.path, backupFileCopy);
 
     List *sourceINodes = initializeList();
     List *backupINodes = initializeList();

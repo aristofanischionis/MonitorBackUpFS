@@ -69,30 +69,6 @@ TreeNode* addKid(TreeNode *node, Data data) {
     }
 }
 
-// TreeNode* checker(TreeNode* node, Data data){
-
-//     if((node == NULL) || (!strcmp(data.name, ""))) return NULL;
-//     if(!strcmp(node->data.name, data.name)) return node;
-
-//     if(node->kid != NULL) return checker(node->kid, data);
-//     if(node->sibling != NULL) return checker(node->sibling, data);
-// }
-
-// TreeNode* search(Tree *tree, Data data){
-//     // base case
-//     if ((tree == NULL) || (tree->root == NULL) || (!strcmp(tree->root->data.name, data.name))) {
-//         return tree->root;
-//     }
-//     TreeNode *node, *res;
-//     node = tree->root;
-//     res = checker(node, data);
-//     if(res == NULL){
-//         printf("Couldn't find the desired name : %s\n", data.name);
-//         return NULL;
-//     }
-//     return res;
-// }
-
 TreeNode * searchByPath(TreeNode *node, char *path) {
     if(node == NULL){
         return NULL;
@@ -101,8 +77,8 @@ TreeNode * searchByPath(TreeNode *node, char *path) {
         return node;
     } 
 
-    TreeNode *nodeKid;
-    TreeNode *nodeSibling;
+    TreeNode *nodeKid = NULL;
+    TreeNode *nodeSibling = NULL;
     if(node->kid != NULL){
         nodeKid = searchByPath(node->kid, path);
     } 
@@ -115,8 +91,6 @@ TreeNode * searchByPath(TreeNode *node, char *path) {
     } else {
         return nodeSibling;
     }
-    
-
 }
 
 void deleteKids(TreeNode* node) {

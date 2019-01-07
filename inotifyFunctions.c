@@ -1,6 +1,7 @@
 #include "Headerfiles/inotifyCode.h"
 #include <signal.h>
 #include <fcntl.h>
+#include <libgen.h>
 #include "Headerfiles/traverse.h"
 #include "Headerfiles/functions.h"
 
@@ -168,21 +169,21 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList, Tree
             char *source = (*map)[j].name;
             /* Print the name of the file */
             char eventPath[MAX];
-            
+            sprintf(eventPath, "%s%s", source, event->name);
             // check if event happened in a file or a directory and create its path string
-            if (event->mask & IN_ISDIR) {
-                strcpy(eventPath, source);
-                // printf(" [directory]\n");
-            } else {
-                sprintf(eventPath, "%s%s", source, event->name);
-                // printf(" [file]\n");
-            }
+            // if (event->mask & IN_ISDIR) {
+            //     strcpy(eventPath, source);
+            //     // printf(" [directory]\n");
+            // } else {
+            //     sprintf(eventPath, "%s%s", source, event->name);
+            //     // printf(" [file]\n");
+            // }
 
             // call the function to handle the event
             useFunction(event, fd, source, backup, sourceList, backupList, watched, map, wd);
 
             updateSourceTree(event, eventPath, sourceTree, sourceList);
-            // printTree(*sourceTree);
+            printTree(*sourceTree);
             // traverseTrees(sourceTree, backupTree, &sourceList, &backupList);
 
             // call readdirectories and traverse trees in order to update the logical structures
@@ -235,20 +236,34 @@ const char *eventName(struct inotify_event *event)
 
 // Depending on the event, update the source tree structure
 void updateSourceTree(struct inotify_event* event, char* path, Tree **sourceTree, List *sourceList) {
-    TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
-    printf("node found is %s\n", nodeFound->data.path);
     if (event->mask & IN_ATTRIB) {
     } 
     else if (event->mask & IN_CLOSE_WRITE) {
     } 
     else if (event->mask & IN_CREATE) {
+        // make a copy of path to pass so that it doesn't change when passed to functions
+        char *pathCopy = malloc(strlen(path)+1);
+        strcpy(pathCopy, path);
+        TreeNode *previous = searchByPath((*sourceTree)->root, dirname(pathCopy));
+        strcpy(pathCopy, path);
+        Data data;
+        strcpy(data.path, path);
+        strcpy(data.name, basename(pathCopy));
+        INode *node = addINode(&sourceList, path);
+        data.inode = node;
+        addKid(previous, data);
+        return;
     }
     else if (event->mask & IN_DELETE) {
+        TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
         deleteINode(&sourceList, nodeFound->data.inode->inodeNum, nodeFound->data.name);
         deleteNode(*sourceTree, nodeFound);
+        return;
     }
     else if (event->mask & IN_DELETE_SELF) {
+        TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
         deleteNode(*sourceTree, nodeFound);
+        return;
     }
     else if (event->mask & IN_MODIFY) {
     }
