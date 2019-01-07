@@ -102,6 +102,7 @@ void addWatch(char *source, int fd, char* d_name, int *watched, WDmapping** map)
 void handleEvents(int fd, char *backup, List *sourceList, List *backupList, Tree **sourceTree, Tree **backupTree, int *watched, WDmapping** map)
 {
     char currentName[MAX];
+    int wd;
     running = 1;
     /* Some systems cannot read integer variables if they are not
               properly aligned. On other systems, incorrect alignment may
@@ -158,6 +159,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList, Tree
                 if ((*map)[j].wd == event->wd)
                 {
                     printf("Name of watched dir is : %s | ", (*map)[j].name);
+                    wd = (*map)[j].wd;
                     break;
                 }
             }
@@ -168,7 +170,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList, Tree
 
             char *source = (*map)[j].name;
             // call the function to handle the event
-            useFunction(event, fd, source, backup, sourceList, watched, map);
+            useFunction(event, fd, source, backup, sourceList, backupList, watched, map, wd);
             readDirectory(source, &sourceList, (*sourceTree)->root);
             printTree(*sourceTree);
             traverseTrees(sourceTree, backupTree, &sourceList, &backupList);
@@ -226,22 +228,24 @@ const char *eventName(struct inotify_event *event)
         return "unknown event";
 }
 
-void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* list, int *watched, WDmapping** map){
+void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, List* backupList, int *watched, WDmapping** map, int wd){
     if (event->mask & IN_ATTRIB){
-        attribMode(event, path, backup, list);
+        attribMode(event, path, backup, sourceList);
     }
     else if (event->mask & IN_CLOSE_WRITE){
-        closeWriteMode(event, path, backup, list);
+        closeWriteMode(event, path, backup, backupList);
     }
     else if (event->mask & IN_CREATE){
-        createMode(event, fd, path, backup, list, watched, map);
+        createMode(event, fd, path, backup, sourceList, watched, map);
     }
-    else if (event->mask & IN_DELETE)
-        return;
-    else if (event->mask & IN_DELETE_SELF)
-        return;
+    else if (event->mask & IN_DELETE){
+        deleteMode(event, path, backup);
+    }
+    else if (event->mask & IN_DELETE_SELF){
+        deleteSelfMode(event, fd, wd, path, backup);
+    }
     else if (event->mask & IN_MODIFY){
-        modifyMode(event, path, list);
+        modifyMode(event, path, backup, backupList);
     }
     else if (event->mask & IN_MOVED_FROM)
         return;
@@ -367,16 +371,21 @@ void attribMode(struct inotify_event *event, char* path, char* backup, List* sou
     free(bPath);
 }
 
-void modifyMode(struct inotify_event *event, char* path, List* sourceList){
-    char fullPath[MAX];
+void modifyMode(struct inotify_event *event, char* path, char* backup, List* backupList){
+    // char fullPath[MAX];
     struct stat statbuf;
     INode* inode;
     char buf[MAX];
-    sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
+    char* bPath;
+    bPath = malloc(MAX * sizeof(char));
+    bPath = backupPath(path, backup);
+    //
+    sprintf(bPath, "%s%s", bPath, event->name);
+    // sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
-        printf("it is a file in modifyMode %s\n", fullPath);
-        inode = searchForINodeByPath(sourceList, fullPath);
+        // printf("it is a file in modifyMode %s\n", fullPath);
+        inode = searchForINodeByPath(backupList, bPath);
         if(inode == NULL){
             perror("inode is null\n");
             exit(1);
@@ -386,11 +395,12 @@ void modifyMode(struct inotify_event *event, char* path, List* sourceList){
     }
 }
 
-void closeWriteMode(struct inotify_event *event, char* path, char* backup, List* sourceList){
+void closeWriteMode(struct inotify_event *event, char* path, char* backup, List* backupList){
     char fullPath[MAX];
     struct stat statbuf;
     INode* inode;
     char buf[MAX];
+    char buf1[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
     bPath = backupPath(path, backup);
@@ -400,7 +410,7 @@ void closeWriteMode(struct inotify_event *event, char* path, char* backup, List*
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
         printf("it is a file in closeWriteMode %s\n", fullPath);
-        inode = searchForINodeByPath(sourceList, fullPath);
+        inode = searchForINodeByPath(backupList, bPath);
         if(inode == NULL){
             perror("inode is null\n");
             exit(1);
@@ -409,6 +419,7 @@ void closeWriteMode(struct inotify_event *event, char* path, char* backup, List*
         if(inode->modified == 1){
             // copy it
             // rm old file from backup first
+            sprintf(bPath, "%s", realpath(bPath, buf1));
             printf("I will remove %s \n", bPath);
             remove(bPath);
             // cp file from source to backup
@@ -419,4 +430,40 @@ void closeWriteMode(struct inotify_event *event, char* path, char* backup, List*
         }
     }
     free(bPath);
+}
+
+void deleteMode(struct inotify_event *event, char* path, char* backup){
+    // char fullPath[MAX];
+    char buf[MAX];
+    char* bPath;
+    bPath = malloc(MAX * sizeof(char));
+    bPath = backupPath(path, backup);
+    //
+    sprintf(bPath, "%s%s", bPath, event->name);
+    // sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
+    if (!(event->mask & IN_ISDIR)){
+        // if it is a file
+        printf("it is a file in deleteMode %s\n", bPath);
+        if (unlink(bPath) == 0){
+            printf("File was deleted successfully from backup\n");
+        }
+        else perror("An error occured when trying to delete file\n");
+    }
+}
+
+void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, char* backup){
+    char buf[MAX];
+    char* bPath;
+    bPath = malloc(MAX * sizeof(char));
+    bPath = backupPath(path, backup);
+    //
+    sprintf(bPath, "%s/", realpath(bPath, buf));
+   
+    // if it is a dir
+    printf("it is dir %s in DeleteSelf \n", bPath);
+    // remove it from backup
+    rmdir(bPath);
+    //
+    inotify_rm_watch(fd, wd);
+    
 }
