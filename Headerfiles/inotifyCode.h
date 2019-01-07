@@ -38,5 +38,6 @@ void deleteMode(struct inotify_event *event, char* path, char* backup);
 void handleEvents(int fd, char* backup, List *sourceList, List *backupList, Tree **sourceTree, Tree **backupTree, int *watched, WDmapping** map);
 void rmWD(WDmapping *map, int watched, int fd);
 int inotifyCode(char* source, char* backup, List* sourceINodes, List *backupINodes, Tree **sourceTree, Tree **backupTree);
+void updateSourceTree(struct inotify_event* event, char* path, Tree **sourceTree, List *sourceList);
 
 #endif

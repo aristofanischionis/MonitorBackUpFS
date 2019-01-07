@@ -27,12 +27,13 @@ TreeNode* newNode(Data data);
 TreeNode* addSiblingSorted(TreeNode *node, Data data);
 TreeNode* addKid(TreeNode* node, Data data);
 TreeNode* finderKids(TreeNode *toCheck, char *name);
-TreeNode* search(Tree *root, Data data);
+// TreeNode* search(Tree *root, Data data);
+TreeNode * searchByPath(TreeNode *node, char *path);
 void deleteKids(TreeNode* node);
 TreeNode *findPrevious(TreeNode *node, Data data);
 TreeNode * deleteNode(Tree* root, TreeNode* node);
 void printTree(Tree *tree);
 void printBranch(TreeNode *node, char *parentName);
-TreeNode* checker(TreeNode* node, Data data);
+// TreeNode* checker(TreeNode* node, Data data);
 
 #endif

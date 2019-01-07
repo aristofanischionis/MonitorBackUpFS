@@ -101,7 +101,7 @@ void printINodes(List *list) {
 }
 
 // Delete given inode and all copies pointing to this inode, only if this inode
-// has only one name pointing to it
+// has only one name pointing to it 
 int deleteINode(List **list, int inodeNum, char *name) {
     INode *node = searchForINode(*list, inodeNum);
     // check if given node exists

@@ -15,6 +15,7 @@ void handle_sigint(int sig)
    
 }
 
+// Opens directories and adds thems to watch list
 void recursiveWatch(char *source, int fd, int *watched, WDmapping** map)
 {
 	DIR *d;
@@ -163,26 +164,30 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList, Tree
                     break;
                 }
             }
-            /* Print the name of the file */
-
-            if (event->len)
-                printf("%s\n", event->name);
 
             char *source = (*map)[j].name;
+            /* Print the name of the file */
+            char eventPath[MAX];
+            
+            // check if event happened in a file or a directory and create its path string
+            if (event->mask & IN_ISDIR) {
+                strcpy(eventPath, source);
+                // printf(" [directory]\n");
+            } else {
+                sprintf(eventPath, "%s%s", source, event->name);
+                // printf(" [file]\n");
+            }
+
             // call the function to handle the event
             useFunction(event, fd, source, backup, sourceList, backupList, watched, map, wd);
-            readDirectory(source, &sourceList, (*sourceTree)->root);
-            printTree(*sourceTree);
-            traverseTrees(sourceTree, backupTree, &sourceList, &backupList);
+
+            updateSourceTree(event, eventPath, sourceTree, sourceList);
+            // printTree(*sourceTree);
+            // traverseTrees(sourceTree, backupTree, &sourceList, &backupList);
 
             // call readdirectories and traverse trees in order to update the logical structures
 
             /* Print type of filesystem object */
-
-            if (event->mask & IN_ISDIR)
-                printf(" [directory]\n");
-            else
-                printf(" [file]\n");
 
 			//advance read_ptr to the beginning of the next event
 			read_ptr += EVENT_SIZE + event->len;
@@ -226,6 +231,31 @@ const char *eventName(struct inotify_event *event)
         return "moved into";
     else
         return "unknown event";
+}
+
+// Depending on the event, update the source tree structure
+void updateSourceTree(struct inotify_event* event, char* path, Tree **sourceTree, List *sourceList) {
+    TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
+    printf("node found is %s\n", nodeFound->data.path);
+    if (event->mask & IN_ATTRIB) {
+    } 
+    else if (event->mask & IN_CLOSE_WRITE) {
+    } 
+    else if (event->mask & IN_CREATE) {
+    }
+    else if (event->mask & IN_DELETE) {
+        deleteINode(&sourceList, nodeFound->data.inode->inodeNum, nodeFound->data.name);
+        deleteNode(*sourceTree, nodeFound);
+    }
+    else if (event->mask & IN_DELETE_SELF) {
+        deleteNode(*sourceTree, nodeFound);
+    }
+    else if (event->mask & IN_MODIFY) {
+    }
+    else if (event->mask & IN_MOVED_FROM) {
+    }
+    else if (event->mask & IN_MOVED_TO) {
+    }
 }
 
 void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, List* backupList, int *watched, WDmapping** map, int wd){

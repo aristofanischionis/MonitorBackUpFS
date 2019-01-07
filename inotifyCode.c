@@ -1,6 +1,7 @@
 #include "Headerfiles/inotifyCode.h"
 #include "Headerfiles/functions.h"
 
+// Add files to be watched by inotify
 int inotifyCode(char *source, char *backup, List *sourceINodes, List *backupINodes, Tree **sourceTree, Tree **backupTree)
 {
 	int watched;
@@ -47,7 +48,6 @@ int inotifyCode(char *source, char *backup, List *sourceINodes, List *backupINod
 	printf("watch added!\n");
 	watched++;
 	
-	//
 	recursiveWatch(map[0].name, fd, &watched, &map);
 
 	if (watched == 0)

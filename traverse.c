@@ -92,12 +92,12 @@ void recurseAlgorithm(Tree *backupTree, List **sourceINodes,
     }
     else if (kidCase == FILE_IN_BOTH) {
         // if file has been modified update backup inode struct info
-        if (sourceNode->kid->data.inode->modDate != backupNode->kid->data.inode->modDate ||
-        sourceNode->kid->data.inode->size != backupNode->kid->data.inode->size) {
-            backupNode->kid->data.inode->modDate = sourceNode->kid->data.inode->modDate;
-            backupNode->kid->data.inode->size = sourceNode->kid->data.inode->size;
-            backupNode->kid->data.inode->modified = 1;
-        }
+        // if (sourceNode->kid->data.inode->modDate != backupNode->kid->data.inode->modDate ||
+        // sourceNode->kid->data.inode->size != backupNode->kid->data.inode->size) {
+        //     backupNode->kid->data.inode->modDate = sourceNode->kid->data.inode->modDate;
+        //     backupNode->kid->data.inode->size = sourceNode->kid->data.inode->size;
+        //     backupNode->kid->data.inode->modified = 1;
+        // }
         recurseAlgorithm(backupTree, sourceINodes, backupINodes, sourceNode->kid, backupNode->kid);
     }  
 }

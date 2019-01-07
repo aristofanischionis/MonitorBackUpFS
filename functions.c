@@ -26,6 +26,10 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
         exit(EXIT_FAILURE);
     } else {
         while ((direntp = readdir(file_ptr)) != NULL) {
+            // remove '\' character if it exists at the end of the filename
+            if (filename[strlen(filename)-1] == '/') {
+                filename[strlen(filename)-1] = 0;
+            }
             sprintf(path, "%s/%s", filename, direntp->d_name);
             strcpy(data.name, direntp->d_name);
             strcpy(data.path, path);
@@ -49,6 +53,7 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     }
 }
 
+// Copy source files and backup and if backup doesn't exist create it
 void makeBackup(char *source, char *backup) {
     pid_t cp_pid;
     DIR *ds, *db;
@@ -131,6 +136,7 @@ void makeBackup(char *source, char *backup) {
     return;
 }
 
+// Make a directory in the given path with the given name
 void makeDirectory(char *path, char *name) {
     char buf[MAX];
     char toMake[MAX];
@@ -164,6 +170,7 @@ char *backupPath(char *sourcePath, char *backupBase) {
     return backup;
 }
 
+// Copy a source file or directory in the dest
 void copy(char *source, char *dest)
 {
     int childExitStatus;

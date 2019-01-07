@@ -23,6 +23,8 @@ int main(int argc, char const *argv[]) {
     Data sourceData, backupData;
     strcpy(sourceData.name, sourceFilename);
     strcpy(backupData.name, backupFilename);
+    strcpy(sourceData.path, sourceFilename);
+    strcpy(backupData.path, backupFilename);
 
     List *sourceINodes = initializeList();
     List *backupINodes = initializeList();
@@ -32,9 +34,13 @@ int main(int argc, char const *argv[]) {
 
     // make backup folder if it doesn't exist
     makeBackup(sourceFilename, backupFilename);
-
-    readDirectory(sourceFilename, &sourceINodes, sourceTree->root);
-    readDirectory(backupFilename, &backupINodes, backupTree->root);
+    // make copies of filenames so that they don't change when passed in functions
+    char *sourceByValue = malloc(strlen(sourceFilename)+1);
+    strcpy(sourceByValue, sourceFilename);
+    char *backupByValue = malloc(strlen(backupFilename)+1);
+    strcpy(backupByValue, backupFilename);
+    readDirectory(sourceByValue, &sourceINodes, sourceTree->root);
+    readDirectory(backupByValue, &backupINodes, backupTree->root);
     
     traverseTrees(&sourceTree, &backupTree, &sourceINodes, &backupINodes);
 
