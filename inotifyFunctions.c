@@ -419,6 +419,7 @@ void modifyMode(struct inotify_event *event, char* path, char* backup, List* bac
         // mark it as modified
         inode->modified = 1;
     }
+    free(bPath);
 }
 
 void closeWriteMode(struct inotify_event *event, char* path, char* backup, List* backupList){
@@ -475,6 +476,7 @@ void deleteMode(struct inotify_event *event, char* path, char* backup){
         }
         else perror("An error occured when trying to delete file\n");
     }
+    free(bPath);
 }
 
 void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, char* backup){
@@ -510,6 +512,7 @@ void movedFromMode(struct inotify_event *event, char* path, char* backup){
     printf("I am moved from mode and the path of the file is %s \n", bPath);
     cookieValue1 = event->cookie;
     strcpy(movedName, bPath);
+    free(bPath);
 }
 
 // file moved inside the watched dir
@@ -540,4 +543,5 @@ void movedToMode(struct inotify_event *event, int fd, char* path, char* backup, 
     cookieValue1 = 0;
     // clear the movedName
     memset(movedName,0,sizeof(movedName));
+    free(bPath);
 }

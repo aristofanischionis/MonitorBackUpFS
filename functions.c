@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <limits.h>
+#include <libgen.h>
 #include "Headerfiles/functions.h"
 #include "Headerfiles/tree.h"
 #include "Headerfiles/defines.h"
@@ -49,44 +50,39 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     }
 }
 
+
 void makeBackup(char *source, char *backup) {
+    char buf[MAX], buf1[MAX];
     pid_t cp_pid;
-    DIR *ds, *db;
-    /* Open the directory specified by "source". */
-
-    ds = opendir(source);
-    /* Check it was opened. */
-    if (!ds) {
-        perror("Cannot open directory source in Backup\n");
-        exit(EXIT_FAILURE);
-    }
-
-    /* Open the directory specified by "backup". */
+    char* bPath;
+    char* sourcePath;
+    DIR *db;
+    bPath = malloc(MAX * sizeof(char));
+    strcpy(bPath, "");
+    sourcePath = malloc(MAX * sizeof(char));
+    if(!source || !backup){
+        perror("source or backup not given\n");
+        exit(1);
+    } 
 
     db = opendir(backup);
-    /* Check it was opened. */
-    if (!db) {
-        printf("Backup doesn't exist yet!\n");
-        if ((cp_pid = fork()) == -1) {
-            perror(" fork ");
-            exit(EXIT_FAILURE);
-        }
-        if (cp_pid == 0) {
-            // child
-            char *params[5];
-            params[0] = "cp";
-            params[1] = "-a";
-            params[2] = malloc(MAX * sizeof(char));
-            strcpy(params[2], source);
-            params[3] = malloc(MAX * sizeof(char));
-            sprintf(params[3], "%s/", backup);
-            params[4] = NULL;
-            execvp("cp", params);
-        } else {
-            wait(NULL);
-        }
-    } else {
-        printf("Backup exists already!\n");
+    if(db){
+        sprintf(bPath, "%s", realpath(backup, buf));
+    }
+    closedir(db);
+    sprintf(sourcePath, "%s/", realpath(source, buf));
+
+    if(sourcePath == NULL){
+        perror("source name for backup doesn't exist\n");
+        exit(1);
+    }
+    if(!strcmp(bPath, "")){
+        // means that there is not a backup yet
+        printf("Backup doesnot exist: %s, %s\n", sourcePath, backup);
+        copy(sourcePath, backup);
+    }
+    else {
+        printf("Backup exists already!  %s \n", bPath);
         // so first delete it
         if ((cp_pid = fork()) == -1) {
             perror(" fork ");
@@ -98,38 +94,18 @@ void makeBackup(char *source, char *backup) {
             params[0] = "rm";
             params[1] = "-rf";
             params[2] = malloc(MAX * sizeof(char));
-            strcpy(params[2], backup);
+            strcpy(params[2], bPath);
             params[3] = NULL;
             execvp("rm", params);
         } else {
             wait(NULL);
         }
-        // now that it is deleted let's cp the source to it
-
-        if ((cp_pid = fork()) == -1) {
-            perror(" fork ");
-            exit(EXIT_FAILURE);
-        }
-        if (cp_pid == 0) {
-            // child
-            char *params[5];
-            params[0] = "cp";
-            params[1] = "-a";
-            params[2] = malloc(MAX * sizeof(char));
-            strcpy(params[2], source);
-            params[3] = malloc(MAX * sizeof(char));
-            sprintf(params[3], "%s/", backup);
-            params[4] = NULL;
-            params[4] = NULL;
-            execvp("cp", params);
-        } else {
-            wait(NULL);
-        }
+        // find the parent folder where we re going to copy the source to
+        printf("I will copy source to %s \n", backup);
+        copy(sourcePath, backup);
     }
-    closedir(ds);
-    closedir(db);
-    return;
 }
+
 
 void makeDirectory(char *path, char *name) {
     char buf[MAX];
@@ -170,44 +146,26 @@ void copy(char *source, char *dest)
     pid_t pid;
     int status;
     if (!source || !dest) {
-        /* handle as you wish */
         perror("Source or Destination in copy is not specified\n");
         exit(1);
     }
 
     pid = fork();
 
-    if (pid == 0) { /* child */
+    if (pid == 0) {
         execl("/bin/cp", "/bin/cp", "-a", source, dest, (char *)0);
     }
     else if (pid < 0) {
-        /* error - couldn't start process - you decide how to handle */
         perror("pid<0 in copy\n");
         exit(1);
     }
     else {
-        /* parent - wait for child - this has all error handling, you
-         * could just call wait() as long as you are only expecting to
-         * have one child process at a time.
-         */
         pid_t ws = waitpid( pid, &childExitStatus, WNOHANG);
         if (ws == -1)
-        { /* error - handle as you wish */
+        {
             perror("waitpid error in copy\n");
             exit(1);
         }
-
-        // if( WIFEXITED(childExitStatus)) /* exit code in childExitStatus */
-        // {
-        //     status = WEXITSTATUS(childExitStatus); /* zero is normal exit */
-        //     /* handle non-zero as you wish */
-        // }
-        // else if (WIFSIGNALED(childExitStatus)) /* killed */
-        // {
-        // }
-        // else if (WIFSTOPPED(childExitStatus)) /* stopped */
-        // {
-        // }
     }
 }
 
