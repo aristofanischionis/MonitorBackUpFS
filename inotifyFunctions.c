@@ -275,29 +275,33 @@ void updateSourceTree(struct inotify_event* event, char* path, Tree **sourceTree
 
 void useFunction(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, List* backupList, int *watched, WDmapping** map, int wd){
     if (event->mask & IN_ATTRIB){
+        printf("IN ATTRIB\n");
         attribMode(event, path, backup, sourceList);
-    }
-    else if (event->mask & IN_CLOSE_WRITE){
+    } else if (event->mask & IN_CLOSE_WRITE){
+        printf("IN CLOSE WRITE\n");
         closeWriteMode(event, path, backup, backupList);
-    }
-    else if (event->mask & IN_CREATE){
+    } else if (event->mask & IN_CREATE){
+        printf("IN CREATE\n");
         createMode(event, fd, path, backup, sourceList, watched, map);
-    }
-    else if (event->mask & IN_DELETE){
+    } else if (event->mask & IN_DELETE){
+        printf("IN DELETE\n");
         deleteMode(event, path, backup);
-    }
-    else if (event->mask & IN_DELETE_SELF){
+    } else if (event->mask & IN_DELETE_SELF){
+        printf("IN DELETE SELF\n");
         deleteSelfMode(event, fd, wd, path, backup);
-    }
-    else if (event->mask & IN_MODIFY){
+    } else if (event->mask & IN_MODIFY){
+        printf("IN MODIFY\n");
         modifyMode(event, path, backup, backupList);
+    } else if (event->mask & IN_MOVED_FROM) {
+        printf("IN MOVED FROM\n");
+        return;
+    } else if (event->mask & IN_MOVED_TO) {
+        printf("IN MOVED TO\n");  
+        return;
+    } else {
+        printf("ELSE\n");
+        return;
     }
-    else if (event->mask & IN_MOVED_FROM)
-        return;
-    else if (event->mask & IN_MOVED_TO)
-        return;
-    else
-        return;
 }
 
 void rmWD(WDmapping *map, int watched, int fd){
