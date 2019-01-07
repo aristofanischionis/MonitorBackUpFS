@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]) {
 
     /////////////////////////   BIG TEST///////////////////////
 
-    // inotifyCode(sourceFilename, backupFilename, sourceINodes);
+    inotifyCode(sourceFilename, backupFilename, sourceINodes, backupINodes);
 
     // Free allocated memory
     deleteNode(sourceTree, sourceTree->root);
