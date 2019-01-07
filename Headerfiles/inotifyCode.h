@@ -35,6 +35,8 @@ void modifyMode(struct inotify_event *event, char* path, char* backup, List* bac
 void closeWriteMode(struct inotify_event *event, char* path, char* backup, List* sourceList);
 void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, char* backup);
 void deleteMode(struct inotify_event *event, char* path, char* backup);
+void movedFromMode(struct inotify_event *event, char* path, char* backup);
+void movedToMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map);
 void handleEvents(int fd, char* backup, List *sourceList, List *backupList, Tree **sourceTree, Tree **backupTree, int *watched, WDmapping** map);
 void rmWD(WDmapping *map, int watched, int fd);
 int inotifyCode(char* source, char* backup, List* sourceINodes, List *backupINodes, Tree **sourceTree, Tree **backupTree);
