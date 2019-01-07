@@ -7,6 +7,8 @@
 
 
 volatile sig_atomic_t running;
+int cookieValue1 = 0;
+char movedName[MAX];
 
 void handle_sigint(int sig) 
 { 
@@ -179,11 +181,40 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList, Tree
             //     // printf(" [file]\n");
             // }
 
+            /* Print the name of the file */
+            
+            // event->len  = 0 when the event happens for the watched object(dir)
+            // and event->len >0 when it happens for a file in the dir
+            if (event->len)
+                printf("%s\n", event->name);
+
+            
+            // check for moved case
+
+            if(cookieValue1 != 0){
+                // check for moved case
+                printf("the previous event was a moved from with cookie : %d and name %s \n", cookieValue1, movedName);
+                if(event->mask & IN_MOVED_TO){
+                    // just go to use Function
+                    printf("I will not do anything now, just let the movedtomode run\n");
+                }
+                else {
+                    printf("Next event is not moved to so unlink previous file \n");
+                    if (unlink(movedName) == 0){
+                        printf("File was deleted successfully\n");
+                        // clear the movedName
+                        memset(movedName,0,sizeof(movedName));
+                    }
+                }
+            }
+            
             // call the function to handle the event
             useFunction(event, fd, source, backup, sourceList, backupList, watched, map, wd);
 
             updateSourceTree(event, eventPath, sourceTree, sourceList);
             printTree(*sourceTree);
+            // readDirectory(source, &sourceList, (*sourceTree)->root);
+            // printTree(*sourceTree);
             // traverseTrees(sourceTree, backupTree, &sourceList, &backupList);
 
             // call readdirectories and traverse trees in order to update the logical structures
@@ -292,14 +323,14 @@ void useFunction(struct inotify_event *event, int fd, char* path, char* backup, 
     } else if (event->mask & IN_MODIFY){
         printf("IN MODIFY\n");
         modifyMode(event, path, backup, backupList);
-    } else if (event->mask & IN_MOVED_FROM) {
-        printf("IN MOVED FROM\n");
-        return;
-    } else if (event->mask & IN_MOVED_TO) {
-        printf("IN MOVED TO\n");  
-        return;
-    } else {
-        printf("ELSE\n");
+    }
+    else if (event->mask & IN_MOVED_FROM){
+        movedFromMode(event, path, backup);
+    }
+    else if (event->mask & IN_MOVED_TO){
+        movedToMode(event, fd, path, backup, sourceList, watched, map);
+    }
+    else {
         return;
     }
 }
@@ -320,10 +351,10 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
     if (event->mask & IN_ISDIR){
         // printf(" [directory]\n");
         // create a catalog mkdir in the destination
-        if (event->len <= 0){
-            printf("event->len <= 0\n");
-            exit(EXIT_FAILURE);
-        }
+        // if (event->len <= 0){
+        //     printf("event->len <= 0\n");
+        //     exit(EXIT_FAILURE);
+        // }
         // making the dir
         printf("Make dir!\n");
         makeDirectory(backupTo, event->name);
@@ -361,7 +392,7 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
             int fdNewFile;
             fdNewFile = open(newPath, O_WRONLY | O_CREAT, 0644);
             close(fdNewFile);
-            // add inode copyy!!!!!
+            // add inode !!!!!
         }
 
     }
@@ -442,6 +473,7 @@ void modifyMode(struct inotify_event *event, char* path, char* backup, List* bac
         // mark it as modified
         inode->modified = 1;
     }
+    free(bPath);
 }
 
 void closeWriteMode(struct inotify_event *event, char* path, char* backup, List* backupList){
@@ -498,6 +530,7 @@ void deleteMode(struct inotify_event *event, char* path, char* backup){
         }
         else perror("An error occured when trying to delete file\n");
     }
+    free(bPath);
 }
 
 void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, char* backup){
@@ -515,4 +548,54 @@ void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, cha
     //
     inotify_rm_watch(fd, wd);
     
+}
+
+// file moved outside the watched dir
+void movedFromMode(struct inotify_event *event, char* path, char* backup){
+    // have to wait for the next event check if it is moved to and then check the cookie field
+    // if cookie is the same the file remains in the same folder just under different name
+    // event->cookie
+    // make a note of the cookie val
+    char buf[MAX];
+    char* bPath;
+    bPath = malloc(MAX * sizeof(char));
+    bPath = backupPath(path, backup);
+    //
+    sprintf(bPath, "%s/", realpath(bPath, buf));
+    sprintf(bPath, "%s%s", bPath, event->name);
+    printf("I am moved from mode and the path of the file is %s \n", bPath);
+    cookieValue1 = event->cookie;
+    strcpy(movedName, bPath);
+    free(bPath);
+}
+
+// file moved inside the watched dir
+void movedToMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map){
+    char buf[MAX];
+    char* bPath;
+    bPath = malloc(MAX * sizeof(char));
+    bPath = backupPath(path, backup);
+    //
+    sprintf(bPath, "%s/", realpath(bPath, buf));
+    sprintf(bPath, "%s%s", bPath, event->name);
+    printf("I am moved to mode and the path of the file is %s \n", bPath);
+
+    if(cookieValue1 == event->cookie){
+        // it is the same hierarchy
+        // must move name to the correct folder
+        printf("same cookies so copy and unlink the previous file\n");
+        rename(movedName, bPath);
+        // copy(movedName, bPath);
+        // delete the movedname afterwards we don't need it there
+        if(unlink(movedName) == 0 ) printf("Deleted the file successfully!\n");
+    }
+    else {
+        printf("not the same cookies\n");
+        createMode(event, fd, path, backup, sourceList, watched, map);
+        copy(movedName, bPath);
+    }
+    cookieValue1 = 0;
+    // clear the movedName
+    memset(movedName,0,sizeof(movedName));
+    free(bPath);
 }
