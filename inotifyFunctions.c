@@ -1,6 +1,7 @@
 #include "Headerfiles/inotifyCode.h"
 #include <signal.h>
 #include <fcntl.h>
+#include "Headerfiles/traverse.h"
 #include "Headerfiles/functions.h"
 
 
@@ -98,7 +99,7 @@ void addWatch(char *source, int fd, char* d_name, int *watched, WDmapping** map)
 }
 
 // take list of source inodes
-void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmapping** map)
+void handleEvents(int fd, char *backup, List *sourceList, List *backupList, Tree **sourceTree, Tree **backupTree, int *watched, WDmapping** map)
 {
     char currentName[MAX];
     running = 1;
@@ -163,10 +164,15 @@ void handleEvents(int fd, char* backup, List *sourceList, int *watched, WDmappin
             /* Print the name of the file */
 
             if (event->len)
-                printf("%s", event->name);
+                printf("%s\n", event->name);
 
+            char *source = (*map)[j].name;
             // call the function to handle the event
-            useFunction(event, fd, (*map)[j].name, backup, sourceList, watched, map);
+            useFunction(event, fd, source, backup, sourceList, watched, map);
+            readDirectory(source, &sourceList, (*sourceTree)->root);
+            printTree(*sourceTree);
+            traverseTrees(sourceTree, backupTree, &sourceList, &backupList);
+
             // call readdirectories and traverse trees in order to update the logical structures
 
             /* Print type of filesystem object */

@@ -10,10 +10,12 @@ void traverseTrees(Tree **sourceTree, Tree **backupTree, List **sourceINodes,
     // if source has at least one file/dir (which means that backup will have it
     // too because it is copied), check case for first kid of roots until they
     // are the same
+    printf("root kid for backup is %s\n", (*backupTree)->root->kid->data.name);
+    printf("sibling for backup is %s\n", (*backupTree)->root->kid->sibling->data.name);
     if ((*sourceTree)->root->kid != NULL) {
         while (strcmp((*sourceTree)->root->kid->data.name, (*backupTree)->root->kid->data.name)) {
             int firstCase = returnCase((*sourceTree)->root->kid, (*backupTree)->root->kid);
-            if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) {  
+            if (firstCase == FILE_IN_SOURCE || firstCase == DIR_IN_SOURCE) { 
                 addKid((*backupTree)->root, (*sourceTree)->root->kid->data);  
             }
             else if (firstCase == FILE_IN_BACKUP || firstCase == DIR_IN_BACKUP) {

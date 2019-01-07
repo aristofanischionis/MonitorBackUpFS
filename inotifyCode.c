@@ -1,7 +1,7 @@
 #include "Headerfiles/inotifyCode.h"
 #include "Headerfiles/functions.h"
 
-int inotifyCode(char *source, char *backup, List *sourceINodes)
+int inotifyCode(char *source, char *backup, List *sourceINodes, List *backupINodes, Tree **sourceTree, Tree **backupTree)
 {
 	int watched;
 	int i;
@@ -55,7 +55,7 @@ int inotifyCode(char *source, char *backup, List *sourceINodes)
 
 	printf("Listening for events!\n");
 
-	handleEvents(fd, backup, sourceINodes, &watched, &map);
+	handleEvents(fd, backup, sourceINodes, backupINodes, sourceTree, backupTree, &watched, &map);
 
 	printf("I stopped listening for events!\n");
 	rmWD(map, watched, fd);

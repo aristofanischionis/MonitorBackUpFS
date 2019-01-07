@@ -51,9 +51,7 @@ int main(int argc, char const *argv[]) {
     printf("Backup iNodes:\n");
     printINodes(backupINodes);
 
-    /////////////////////////   BIG TEST///////////////////////
-
-    // inotifyCode(sourceFilename, backupFilename, sourceINodes);
+    inotifyCode(sourceFilename, backupFilename, sourceINodes, backupINodes, &sourceTree, &backupTree);
 
     // Free allocated memory
     deleteNode(sourceTree, sourceTree->root);

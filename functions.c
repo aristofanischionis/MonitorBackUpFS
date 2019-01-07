@@ -9,48 +9,37 @@
 #include <sys/wait.h>
 #include <limits.h>
 #include "Headerfiles/functions.h"
+#include "Headerfiles/tree.h"
 #include "Headerfiles/defines.h"
 
-int isDot(char *name)
-{
+int isDot(char *name) {
     return (((!strcmp(name, ".")) || (!strcmp(name, ".."))) ? (1) : (0));
 }
 
-void readDirectory(char *filename, List **list, TreeNode *previous)
-{
+void readDirectory(char *filename, List **list, TreeNode *previous) {
     DIR *file_ptr;
     Data data;
     struct dirent *direntp;
     char path[MAX];
-    if ((file_ptr = opendir(filename)) == NULL)
-    {
+    if ((file_ptr = opendir(filename)) == NULL) {
         perror("Cannot open file");
         exit(EXIT_FAILURE);
-    }
-    else
-    {
-        while ((direntp = readdir(file_ptr)) != NULL)
-        {
+    } else {
+        while ((direntp = readdir(file_ptr)) != NULL) {
             sprintf(path, "%s/%s", filename, direntp->d_name);
             strcpy(data.name, direntp->d_name);
             strcpy(data.path, path);
             // if this is a file (not a pipe, socket, etc) add an inode
-            // if this is a file (not a pipe, socket, etc) add an inode
-            if (isREG(direntp->d_type))
-            {
+            if (isREG(direntp->d_type)) {
                 INode *node = addINode(list, path);
                 data.inode = node;
                 addKid(previous, data);
             }
             // check if direntp is a directory
-            if (isDIR(direntp->d_type))
-            {
+            if (isDIR(direntp->d_type)) {
                 // check if it a new directory (not a . or ..)
-                if (!isDot(direntp->d_name))
-                {
+                if (!isDot(direntp->d_name)) {
                     // if it is a new directory add it only to the tree
-                    // INode *node = addINode(list, path);
-                    // data.inode = node;
                     TreeNode *treenode = addKid(previous, data);
                     readDirectory(path, list, treenode);
                 }
@@ -153,7 +142,7 @@ void makeDirectory(char *path, char *name) {
 }
 
 // Make an identical path to sourcePath, but with backupBase as the root
-char* backupPath(char* sourcePath, char* backupBase){
+char *backupPath(char *sourcePath, char *backupBase) {
     const char s[2] = "/";
     char *token;
     char toCopy[100];
@@ -165,9 +154,9 @@ char* backupPath(char* sourcePath, char* backupBase){
 
     token = strtok(source, s);
 
-    while( token != NULL ) {
+    while (token != NULL) {
         token = strtok(NULL, s);
-        if(token == NULL) break;
+        if (token == NULL) break;
         sprintf(toCopy, "%s/", token);
         strcat(backup, toCopy);
     }
