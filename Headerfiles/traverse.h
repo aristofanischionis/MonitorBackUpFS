@@ -4,7 +4,6 @@
 #include "tree.h"
 #include "list.h"
 
-// int traverseAlgorithm(TreeNode *sourceNode, TreeNode *backupNode);
 void traverseTrees(Tree **sourceTree, Tree **backupTree, List **sourceINodes,
                    List **backupINodes);
 void recurseAlgorithm(Tree *backupTree, List **sourceINodes,

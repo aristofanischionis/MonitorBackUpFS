@@ -22,8 +22,8 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     Data data;
     struct dirent *direntp;
     char path[MAX];
-    if ((file_ptr = opendir(filename)) == NULL) {
         printf("filename %s\n", filename);
+    if ((file_ptr = opendir(filename)) == NULL) {
         perror("Cannot open file");
         exit(EXIT_FAILURE);
     } else {
@@ -55,7 +55,7 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     }
 }
 
-void makeBackup(char *source, char *backup) {
+/*void makeBackup(char *source, char *backup) {
     char buf[MAX], buf1[MAX];
     pid_t cp_pid;
     char* bPath;
@@ -108,6 +108,89 @@ void makeBackup(char *source, char *backup) {
         printf("I will copy source to %s \n", backup);
         copy(sourcePath, backup);
     }
+}*/
+
+// Copy source files and backup and if backup doesn't exist create it
+void makeBackup(char *source, char *backup) {
+    pid_t cp_pid;
+    DIR *ds, *db;
+    /* Open the directory specified by "source". */
+
+    ds = opendir(source);
+    /* Check it was opened. */
+    if (!ds) {
+        perror("Cannot open directory source in Backup\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Open the directory specified by "backup". */
+
+    db = opendir(backup);
+    /* Check it was opened. */
+    if (!db) {
+        printf("Backup doesn't exist yet!\n");
+        if ((cp_pid = fork()) == -1) {
+            perror(" fork ");
+            exit(EXIT_FAILURE);
+        }
+        if (cp_pid == 0) {
+            // child
+            char *params[5];
+            params[0] = "cp";
+            params[1] = "-a";
+            params[2] = malloc(MAX * sizeof(char));
+            strcpy(params[2], source);
+            params[3] = malloc(MAX * sizeof(char));
+            sprintf(params[3], "%s/", backup);
+            params[4] = NULL;
+            execvp("cp", params);
+        } else {
+            wait(NULL);
+        }
+    } else {
+        printf("Backup exists already!\n");
+        // so first delete it
+        if ((cp_pid = fork()) == -1) {
+            perror(" fork ");
+            exit(EXIT_FAILURE);
+        }
+        if (cp_pid == 0) {
+            // child
+            char *params[4];
+            params[0] = "rm";
+            params[1] = "-rf";
+            params[2] = malloc(MAX * sizeof(char));
+            strcpy(params[2], backup);
+            params[3] = NULL;
+            execvp("rm", params);
+        } else {
+            wait(NULL);
+        }
+        // now that it is deleted let's cp the source to it
+
+        if ((cp_pid = fork()) == -1) {
+            perror(" fork ");
+            exit(EXIT_FAILURE);
+        }
+        if (cp_pid == 0) {
+            // child
+            char *params[5];
+            params[0] = "cp";
+            params[1] = "-a";
+            params[2] = malloc(MAX * sizeof(char));
+            strcpy(params[2], source);
+            params[3] = malloc(MAX * sizeof(char));
+            sprintf(params[3], "%s/", backup);
+            params[4] = NULL;
+            params[4] = NULL;
+            execvp("cp", params);
+        } else {
+            wait(NULL);
+        }
+    }
+    closedir(ds);
+    closedir(db);
+    return;
 }
 
 void makeDirectory(char *path, char *name) {
