@@ -4,7 +4,7 @@
 #include "Headerfiles/eventActions.h"
 #include "Headerfiles/inode.h"
 #include "Headerfiles/functions.h"
-#include "Headerfiles/inotifyCode.h"
+#include "Headerfiles/inotifyFunctions.h"
 
 extern int cookieValue1;
 extern char movedName[MAX];;

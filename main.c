@@ -6,7 +6,8 @@
 #include "Headerfiles/functions.h"
 #include "Headerfiles/list.h"
 #include "Headerfiles/traverse.h"
-#include "Headerfiles/inotifyCode.h"
+#include "Headerfiles/inotifyFunctions.h"
+#include "Headerfiles/treeUpdates.h"
 
 int main(int argc, char const *argv[]) {
 

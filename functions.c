@@ -17,44 +17,6 @@ int isDot(char *name) {
     return (((!strcmp(name, ".")) || (!strcmp(name, ".."))) ? (1) : (0));
 }
 
-void readDirectory(char *filename, List **list, TreeNode *previous) {
-    DIR *file_ptr;
-    Data data;
-    struct dirent *direntp;
-    char path[MAX];
-        printf("filename %s\n", filename);
-    if ((file_ptr = opendir(filename)) == NULL) {
-        perror("Cannot open file");
-        exit(EXIT_FAILURE);
-    } else {
-        while ((direntp = readdir(file_ptr)) != NULL) {
-            // remove '\' character if it exists at the end of the filename
-            if (filename[strlen(filename)-1] == '/') {
-                filename[strlen(filename)-1] = 0;
-            }
-            sprintf(path, "%s/%s", filename, direntp->d_name);
-            strcpy(data.name, direntp->d_name);
-            strcpy(data.path, path);
-            // if this is a file (not a pipe, socket, etc) add an inode
-            if (isREG(direntp->d_type)) {
-                INode *node = addINode(list, path);
-                data.inode = node;
-                addKid(previous, data);
-            }
-            // check if direntp is a directory
-            if (isDIR(direntp->d_type)) {
-                // check if it a new directory (not a . or ..)
-                if (!isDot(direntp->d_name)) {
-                    // if it is a new directory add it only to the tree
-                    TreeNode *treenode = addKid(previous, data);
-                    readDirectory(path, list, treenode);
-                }
-            }
-        }
-        closedir(file_ptr);
-    }
-}
-
 /*void makeBackup(char *source, char *backup) {
     char buf[MAX], buf1[MAX];
     pid_t cp_pid;
@@ -254,5 +216,10 @@ void copy(char *source, char *dest)
             exit(1);
         }
     }
+}
+
+void fail(const char *message) {
+    perror(message);
+    exit(1);
 }
 
