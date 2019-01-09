@@ -15,5 +15,6 @@ void makeDirectory(char *path, char *name);
 char* backupPath(char* sourcePath, char* backupBase);
 void copy(char *source, char *dest);
 void fail(const char *message);
+void printStructures (Tree *sourceTree, Tree *backupTree, List *sourceINodes, List *backupINodes);
 
 #endif

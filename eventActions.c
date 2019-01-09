@@ -69,8 +69,6 @@ void attribMode(struct inotify_event *event, char* path, char* backup, List* sou
             exit(1);
         }
         printf (" ctime : %s\n" , ctime(&statbuf.st_ctime));
-        //
-        // printf("------------> fullpath is %s \n", fullPath);
         inode = searchForINodeByPath(sourceList, fullPath);
         if(inode == NULL){
             perror("make sure that you have called add inode after file creation\n");

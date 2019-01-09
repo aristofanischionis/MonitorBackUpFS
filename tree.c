@@ -168,8 +168,8 @@ void printTree(Tree *tree) {
 
 void printBranch(TreeNode *node, char *parentName){
     if (node != NULL) {
-        printBranch(node->sibling, parentName);
         printBranch(node->kid, node->data.name);
+        printBranch(node->sibling, parentName);
         printf("%s in folder %s\n", node->data.name, parentName);
     }
 }

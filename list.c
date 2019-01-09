@@ -95,7 +95,6 @@ void printINodes(List *list) {
     while (current != NULL) {
         printf("%d %ld %s with names\t", current->inodeNum, current->size, ctime(&current->modDate));
         printNames(current->names);
-        printf("\n");
         current = current->next;
     }
 }

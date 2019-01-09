@@ -49,25 +49,13 @@ int main(int argc, char const *argv[]) {
 
     strcpy(sourceFileCopy, sourceFilename);
     strcpy(backupFileCopy, backupFilename);
+    // read both directories to initialize data in tree structures 
     readDirectory(sourceFileCopy, &sourceINodes, sourceTree->root);
     readDirectory(backupFileCopy, &backupINodes, backupTree->root);
     
-    // traverseTrees(&sourceTree, &backupTree, &sourceINodes, &backupINodes);
-    recurseAlgorithm(backupTree, &sourceINodes, &backupINodes, sourceTree->root, backupTree->root);
+    traverseTrees(backupTree, &sourceINodes, &backupINodes, sourceTree->root, backupTree->root);
 
-
-    // Print structures
-    printf("\n\nSource Tree:\n");
-    printTree(sourceTree);
-    printf("\n");
-    printf("Backup Tree:\n");
-    printTree(backupTree);
-    printf("\n");
-    printf("Source iNodes:\n");
-    printINodes(sourceINodes);
-    printf("\n");
-    printf("Backup iNodes:\n");
-    printINodes(backupINodes);
+    printStructures(sourceTree, backupTree, sourceINodes, backupINodes);
 
     inotifyCode(sourceFilename, backupFilename, sourceINodes, backupINodes, &sourceTree, &backupTree);
 

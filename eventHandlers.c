@@ -9,6 +9,7 @@
 #include "Headerfiles/eventActions.h"
 #include "Headerfiles/functions.h"
 #include "Headerfiles/treeUpdates.h"
+#include "Headerfiles/traverse.h"
 
 volatile sig_atomic_t running;
 int cookieValue1 = 0;
@@ -75,11 +76,9 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             }
 
             if (!strcmp(eventName(event), "unknown event")) {
-                // printf("the mask is %x ", event->mask);
                 read_ptr += EVENT_SIZE + event->len;
                 continue;
             }
-            printf("%s: ", eventName(event));
 
             /* Print the name of the watched directory */
             for (j = 0; j < (*watched); j++) {
@@ -92,11 +91,6 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             char *source = (*map)[j].name;
             char eventPath[MAX];
             sprintf(eventPath, "%s%s", source, event->name);
-
-            // event->len  = 0 when the event happens for the watched
-            // object(dir) and event->len >0 when it happens for a file in the
-            // dir
-            if (event->len) printf("%s\n", event->name);
 
             // check for moved case
 
@@ -116,16 +110,11 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             useFunction(event, fd, source, backup, sourceList, backupList,
                         watched, map, wd);
 
+            // Update logical structures
             updateSourceTree(event, eventPath, sourceTree, sourceList);
-            printTree(*sourceTree);
-            // readDirectory(source, &sourceList, (*sourceTree)->root);
-            // printTree(*sourceTree);
-            // traverseTrees(sourceTree, backupTree, &sourceList, &backupList);
-
-            // call readdirectories and traverse trees in order to update the
-            // logical structures
-
-            /* Print type of filesystem object */
+            traverseTrees(*backupTree, &sourceList, &backupList,
+                          (*sourceTree)->root, (*backupTree)->root);
+            printStructures(*sourceTree, *backupTree, sourceList, backupList);
 
             // advance read_ptr to the beginning of the next event
             read_ptr += EVENT_SIZE + event->len;
@@ -168,28 +157,28 @@ void useFunction(struct inotify_event *event, int fd, char *path, char *backup,
                  List *sourceList, List *backupList, int *watched,
                  WDmapping **map, int wd) {
     if (event->mask & IN_ATTRIB) {
-        printf("IN ATTRIB\n");
+        printf("\nIN ATTRIB %s : \n", event->name);
         attribMode(event, path, backup, sourceList);
     } else if (event->mask & IN_CLOSE_WRITE) {
-        printf("IN CLOSE WRITE\n");
+        printf("\nIN CLOSE WRITE %s\n", event->name);
         closeWriteMode(event, path, backup, backupList);
     } else if (event->mask & IN_CREATE) {
-        printf("IN CREATE\n");
+        printf("\nCREATE %s : \n", event->name);
         createMode(event, fd, path, backup, sourceList, watched, map);
     } else if (event->mask & IN_DELETE) {
-        printf("IN DELETE\n");
+        printf("\nIN DELETE %s : \n", event->name);
         deleteMode(event, path, backup);
     } else if (event->mask & IN_DELETE_SELF) {
-        printf("IN DELETE SELF\n");
+        printf("\nIN DELETE SELF %s : \n", event->name);
         deleteSelfMode(event, fd, wd, path, backup);
     } else if (event->mask & IN_MODIFY) {
-        printf("IN MODIFY\n");
+        printf("\nIN MODIFY %s : \n", event->name);
         modifyMode(event, path, backup, backupList);
     } else if (event->mask & IN_MOVED_FROM) {
-        printf("IN MOVE IN\n");
+        printf("\nIN MOVE IN %s : \n", event->name);
         movedFromMode(event, path, backup);
     } else if (event->mask & IN_MOVED_TO) {
-        printf("IN MOVE OUT\n");
+        printf("\nIN MOVE OUT %s : \n", event->name);
         movedToMode(event, fd, path, backup, sourceList, watched, map);
     } else {
         return;

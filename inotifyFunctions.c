@@ -46,7 +46,6 @@ int inotifyCode(char *source, char *backup, List *sourceINodes, List *backupINod
 		watched--;
 		exit(EXIT_FAILURE);
 	}
-	printf("watch added!\n");
 	watched++;
 	
 	recursiveWatch(map[0].name, fd, &watched, &map);
@@ -96,7 +95,6 @@ void recursiveWatch(char *source, int fd, int *watched, WDmapping **map) {
         addWatch(source, fd, d_name, watched, map);
 
         /* Recursively call "recursiveWatch" with the new path. */
-        // printf("Name givenn--------> %s \n", (*map)[(*watched)-1].name);
         recursiveWatch((*map)[(*watched) - 1].name, fd, watched, map);
     }
     /* After going through all the entries, close the directory. */

@@ -165,3 +165,18 @@ void fail(const char *message) {
     exit(1);
 }
 
+void printStructures (Tree *sourceTree, Tree *backupTree, List *sourceINodes, List *backupINodes) {
+    printf("\n\nSOURCE TREE:\n");
+    printTree(sourceTree);
+    printf("\n");
+    printf("BACKUP TREE:\n");
+    printTree(backupTree);
+    printf("\n");
+    printf("SOURCE INODES:\n");
+    printINodes(sourceINodes);
+    printf("\n");
+    printf("BACKUP INODES:\n");
+    printINodes(backupINodes);
+    printf("\n");
+}
+
