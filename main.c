@@ -52,7 +52,9 @@ int main(int argc, char const *argv[]) {
     readDirectory(sourceFileCopy, &sourceINodes, sourceTree->root);
     readDirectory(backupFileCopy, &backupINodes, backupTree->root);
     
-    traverseTrees(&sourceTree, &backupTree, &sourceINodes, &backupINodes);
+    // traverseTrees(&sourceTree, &backupTree, &sourceINodes, &backupINodes);
+    recurseAlgorithm(backupTree, &sourceINodes, &backupINodes, sourceTree->root, backupTree->root);
+
 
     // Print structures
     printf("\n\nSource Tree:\n");

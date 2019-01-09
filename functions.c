@@ -17,61 +17,6 @@ int isDot(char *name) {
     return (((!strcmp(name, ".")) || (!strcmp(name, ".."))) ? (1) : (0));
 }
 
-/*void makeBackup(char *source, char *backup) {
-    char buf[MAX], buf1[MAX];
-    pid_t cp_pid;
-    char* bPath;
-    char* sourcePath;
-    DIR *db;
-    bPath = malloc(MAX * sizeof(char));
-    strcpy(bPath, "");
-    sourcePath = malloc(MAX * sizeof(char));
-    if(!source || !backup){
-        perror("source or backup not given\n");
-        exit(1);
-    } 
-
-    db = opendir(backup);
-    if(db){
-        sprintf(bPath, "%s", realpath(backup, buf));
-    }
-    closedir(db);
-    sprintf(sourcePath, "%s/", realpath(source, buf));
-
-    if(sourcePath == NULL){
-        perror("source name for backup doesn't exist\n");
-        exit(1);
-    }
-    if(!strcmp(bPath, "")){
-        // means that there is not a backup yet
-        printf("Backup does not exist: %s, %s\n", sourcePath, backup);
-        copy(sourcePath, backup);
-    }
-    else {
-        printf("Backup exists already!  %s \n", bPath);
-        // so first delete it
-        if ((cp_pid = fork()) == -1) {
-            perror(" fork ");
-            exit(EXIT_FAILURE);
-        }
-        if (cp_pid == 0) {
-            // child
-            char *params[4];
-            params[0] = "rm";
-            params[1] = "-rf";
-            params[2] = malloc(MAX * sizeof(char));
-            strcpy(params[2], bPath);
-            params[3] = NULL;
-            execvp("rm", params);
-        } else {
-            wait(NULL);
-        }
-        // find the parent folder where we re going to copy the source to
-        printf("I will copy source to %s \n", backup);
-        copy(sourcePath, backup);
-    }
-}*/
-
 // Copy source files and backup and if backup doesn't exist create it
 void makeBackup(char *source, char *backup) {
     pid_t cp_pid;
@@ -90,7 +35,6 @@ void makeBackup(char *source, char *backup) {
     db = opendir(backup);
     /* Check it was opened. */
     if (!db) {
-        printf("Backup doesn't exist yet!\n");
         if ((cp_pid = fork()) == -1) {
             perror(" fork ");
             exit(EXIT_FAILURE);
@@ -110,7 +54,6 @@ void makeBackup(char *source, char *backup) {
             wait(NULL);
         }
     } else {
-        printf("Backup exists already!\n");
         // so first delete it
         if ((cp_pid = fork()) == -1) {
             perror(" fork ");
@@ -184,7 +127,6 @@ char *backupPath(char *sourcePath, char *backupBase) {
         sprintf(toCopy, "%s/", token);
         strcat(backup, toCopy);
     }
-    printf("Backup path is : %s \n", backup);
     return backup;
 }
 

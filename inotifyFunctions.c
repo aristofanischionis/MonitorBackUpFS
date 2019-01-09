@@ -25,10 +25,6 @@ int inotifyCode(char *source, char *backup, List *sourceINodes, List *backupINod
 	map = (WDmapping*)malloc(MAX_WD*sizeof(WDmapping));
 	// monitor root
 
-	/* Print the name of the directory. */
-	printf("Watched is: %d, %s\n", watched, source);
-	//
-
 	strcpy(map[watched].name, source);
 	map[watched].wd = inotify_add_watch(fd, source,
 										IN_CREATE |
@@ -115,12 +111,8 @@ void addWatch(char *source, int fd, char *d_name, int *watched,
     char path[MAX];
     sprintf(path, "%s%s/", source, d_name);
 
-    /* Print the name of the directory. */
-    printf("Watched is: %d, %s\n", (*watched), path);
-    //
     strcpy((*map)[(*watched)].name, path);
-    printf("-->>>> %s \n", (*map)[(*watched)].name);
-    fflush(stdout);
+
     (*map)[(*watched)].wd = inotify_add_watch(fd, path,
                                               IN_CREATE | IN_MODIFY |
 
@@ -136,7 +128,7 @@ void addWatch(char *source, int fd, char *d_name, int *watched,
         (*watched)--;
         exit(EXIT_FAILURE);
     }
-    printf("watch added!\n");
+    
     (*watched)++;
 }
 

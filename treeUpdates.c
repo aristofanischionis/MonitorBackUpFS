@@ -58,7 +58,6 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     Data data;
     struct dirent *direntp;
     char path[MAX];
-        printf("filename %s\n", filename);
     if ((file_ptr = opendir(filename)) == NULL) {
         perror("Cannot open file");
         exit(EXIT_FAILURE);

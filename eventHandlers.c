@@ -84,26 +84,14 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             /* Print the name of the watched directory */
             for (j = 0; j < (*watched); j++) {
                 if ((*map)[j].wd == event->wd) {
-                    printf("Name of watched dir is : %s | ", (*map)[j].name);
                     wd = (*map)[j].wd;
                     break;
                 }
             }
 
             char *source = (*map)[j].name;
-            /* Print the name of the file */
             char eventPath[MAX];
             sprintf(eventPath, "%s%s", source, event->name);
-            // check if event happened in a file or a directory and create its
-            // path string if (event->mask & IN_ISDIR) {
-            //     strcpy(eventPath, source);
-            //     // printf(" [directory]\n");
-            // } else {
-            //     sprintf(eventPath, "%s%s", source, event->name);
-            //     // printf(" [file]\n");
-            // }
-
-            /* Print the name of the file */
 
             // event->len  = 0 when the event happens for the watched
             // object(dir) and event->len >0 when it happens for a file in the
@@ -114,21 +102,10 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
 
             if (cookieValue1 != 0) {
                 // check for moved case
-                printf(
-                    "the previous event was a moved from with cookie : %d and "
-                    "name %s \n",
-                    cookieValue1, movedName);
                 if (event->mask & IN_MOVED_TO) {
                     // just go to use Function
-                    printf(
-                        "I will not do anything now, just let the movedtomode "
-                        "run\n");
-                } else {
-                    printf(
-                        "Next event is not moved to so unlink previous file "
-                        "\n");
+                } else {      
                     if (unlink(movedName) == 0) {
-                        printf("File was deleted successfully\n");
                         // clear the movedName
                         memset(movedName, 0, sizeof(movedName));
                     }

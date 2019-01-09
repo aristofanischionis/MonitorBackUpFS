@@ -15,30 +15,17 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
     backupTo = malloc(MAX * sizeof(char));
     backupTo = backupPath(path, backup);
     if (event->mask & IN_ISDIR){
-        // printf(" [directory]\n");
-        // create a catalog mkdir in the destination
-        // if (event->len <= 0){
-        //     printf("event->len <= 0\n");
-        //     exit(EXIT_FAILURE);
-        // }
-        // making the dir
-        printf("Make dir!\n");
         makeDirectory(backupTo, event->name);
         
-        // monitor this catalog
-        printf("Monitor Dir!\n");
         addWatch(path, fd, event->name, watched, map);
     }
     else {
-        // printf(" [file]\n");
         char oldPath[MAX];
         char newPath[MAX];
         
         // make paths
         sprintf(oldPath, "%s%s", path, event->name);
         sprintf(newPath, "%s%s", backupTo, event->name);
-        printf("Old path is %s, new path is %s \n", oldPath, newPath);
-        ///
         // check inode
         inode = searchForINodeByPath(sourceList, oldPath);
         // if(inode == NULL) fail("Inode can't be retrieved properly\n");
@@ -46,7 +33,6 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
         // check if the copy already exists
         if ((inode != NULL) &&  (inode->copy != NULL) ){
             //there is a copy already (which means file created is a hardlink) so link it
-            printf("There is already a copy so link it!\n");
             if ( link (oldPath ,newPath) == -1 ){
                 printf(" Failed to make a new hard link in -> %s, from -> %s \n", newPath, oldPath);
                 exit(1);
@@ -54,7 +40,6 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
         }
         else {
             // create a new copy to the backup 
-            printf("There is not a copy so create it!\n");
             int fdNewFile;
             fdNewFile = open(newPath, O_WRONLY | O_CREAT, 0644);
             close(fdNewFile);
@@ -79,7 +64,6 @@ void attribMode(struct inotify_event *event, char* path, char* backup, List* sou
     // 
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
-        printf("it is a file in attribMode %s\n", fullPath);
         if ( stat ( fullPath , & statbuf ) == -1){
             perror (" Failed to get file status \n");
             exit(1);
@@ -89,27 +73,20 @@ void attribMode(struct inotify_event *event, char* path, char* backup, List* sou
         // printf("------------> fullpath is %s \n", fullPath);
         inode = searchForINodeByPath(sourceList, fullPath);
         if(inode == NULL){
-            // perror("inode is null\n");/
             perror("make sure that you have called add inode after file creation\n");
             // exit(1);
         }
         if(!inode->modDate){
             perror("inode mod data is null\n");
         }
-        else {
-            printf(" inode time : %s\n", ctime(&inode->modDate));
-        }
         double seconds = difftime(statbuf.st_ctime, inode->modDate);
         if (seconds > 0) {
             // update the replica
-            printf("update the replica\n");
             // update the moddate
             inode->modDate = statbuf.st_ctime;
             // rm old file from backup
-            printf("I will remove %s \n", bPath);
             remove(bPath);
             // cp file from source to backup
-            printf("I will make %s \n", bPath);
             copy(fullPath, bPath);
         }
         
@@ -118,7 +95,6 @@ void attribMode(struct inotify_event *event, char* path, char* backup, List* sou
 }
 
 void modifyMode(struct inotify_event *event, char* path, char* backup, List* backupList){
-    // char fullPath[MAX];
     struct stat statbuf;
     INode* inode;
     char buf[MAX];
@@ -127,10 +103,8 @@ void modifyMode(struct inotify_event *event, char* path, char* backup, List* bac
     bPath = backupPath(path, backup);
     //
     sprintf(bPath, "%s%s", bPath, event->name);
-    // sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
-        // printf("it is a file in modifyMode %s\n", fullPath);
         inode = searchForINodeByPath(backupList, bPath);
         if(inode == NULL){
             perror("inode is null\n");
@@ -151,12 +125,11 @@ void closeWriteMode(struct inotify_event *event, char* path, char* backup, List*
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
     bPath = backupPath(path, backup);
-    //
+    
     sprintf(bPath, "%s%s", bPath, event->name);
     sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
-        printf("it is a file in closeWriteMode %s\n", fullPath);
         inode = searchForINodeByPath(backupList, bPath);
         if(inode == NULL){
             perror("inode is null\n");
@@ -167,10 +140,8 @@ void closeWriteMode(struct inotify_event *event, char* path, char* backup, List*
             // copy it
             // rm old file from backup first
             sprintf(bPath, "%s", realpath(bPath, buf1));
-            printf("I will remove %s \n", bPath);
             remove(bPath);
             // cp file from source to backup
-            printf("I will make %s \n", bPath);
             copy(fullPath, bPath);
             // it is not modified any more
             inode->modified = 0;
@@ -185,16 +156,13 @@ void deleteMode(struct inotify_event *event, char* path, char* backup){
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
     bPath = backupPath(path, backup);
-    //
+    
     sprintf(bPath, "%s%s", bPath, event->name);
-    // sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
-        printf("it is a file in deleteMode %s\n", bPath);
-        if (unlink(bPath) == 0){
-            printf("File was deleted successfully from backup\n");
+        if (unlink(bPath) != 0){
+            perror("An error occured when trying to delete file\n");
         }
-        else perror("An error occured when trying to delete file\n");
     }
     free(bPath);
 }
@@ -204,14 +172,13 @@ void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, cha
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
     bPath = backupPath(path, backup);
-    //
+    
     sprintf(bPath, "%s/", realpath(bPath, buf));
    
     // if it is a dir
-    printf("it is dir %s in DeleteSelf \n", bPath);
     // remove it from backup
     rmdir(bPath);
-    //
+    
     inotify_rm_watch(fd, wd);
     
 }
@@ -226,10 +193,9 @@ void movedFromMode(struct inotify_event *event, char* path, char* backup){
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
     bPath = backupPath(path, backup);
-    //
+    
     sprintf(bPath, "%s/", realpath(bPath, buf));
     sprintf(bPath, "%s%s", bPath, event->name);
-    printf("I am moved from mode and the path of the file is %s \n", bPath);
     cookieValue1 = event->cookie;
     strcpy(movedName, bPath);
     free(bPath);
@@ -241,22 +207,18 @@ void movedToMode(struct inotify_event *event, int fd, char* path, char* backup, 
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
     bPath = backupPath(path, backup);
-    //
+    
     sprintf(bPath, "%s/", realpath(bPath, buf));
     sprintf(bPath, "%s%s", bPath, event->name);
-    printf("I am moved to mode and the path of the file is %s \n", bPath);
 
     if(cookieValue1 == event->cookie){
         // it is the same hierarchy
         // must move name to the correct folder
-        printf("same cookies so copy and unlink the previous file\n");
         rename(movedName, bPath);
         // copy(movedName, bPath);
         // delete the movedname afterwards we don't need it there
-        if(unlink(movedName) == 0 ) printf("Deleted the file successfully!\n");
     }
     else {
-        printf("not the same cookies\n");
         createMode(event, fd, path, backup, sourceList, watched, map);
         copy(movedName, bPath);
     }
