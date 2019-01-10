@@ -53,8 +53,7 @@ int main(int argc, char const *argv[]) {
     readDirectory(sourceFileCopy, &sourceINodes, sourceTree->root);
     readDirectory(backupFileCopy, &backupINodes, backupTree->root);
     
-    traverseTrees(backupTree, &sourceINodes, &backupINodes, sourceTree->root, backupTree->root);
-    formatBackupPath(sourceTree->root->data.path, backupTree->root->data.path, sourceTree->root->kid->data.path);
+    traverseTrees(sourceTree->root->data.path, backupTree, &sourceINodes, &backupINodes, sourceTree->root, backupTree->root);
     printStructures(sourceTree, backupTree, sourceINodes, backupINodes);
 
     inotifyCode(sourceFilename, backupFilename, sourceINodes, backupINodes, &sourceTree, &backupTree);

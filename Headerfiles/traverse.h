@@ -4,7 +4,7 @@
 #include "tree.h"
 #include "list.h"
 
-void traverseTrees(Tree *backupTree, List **sourceINodes,
+void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
                       List **backupINodes, TreeNode *sourceNode,
                       TreeNode *backupNode);
 int returnCase(TreeNode *sourceNode, TreeNode *backupNode);

@@ -113,7 +113,8 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
 
             // Update logical structures
             updateSourceTree(event, eventPath, sourceTree, sourceList);
-            traverseTrees(*backupTree, &sourceList, &backupList,
+            printf("source base %s\n", (*sourceTree)->root->data.path);
+            traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
                           (*sourceTree)->root, (*backupTree)->root);
             printStructures(*sourceTree, *backupTree, sourceList, backupList);
 

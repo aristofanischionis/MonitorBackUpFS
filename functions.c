@@ -134,7 +134,7 @@ char *backupPath(char *sourcePath, char *backupBase) {
 
 // Make an identical path to sourcePath, but with backupBase as the root
 char *formatBackupPath(char *sourceBase, char *backupBase, char *sourcePath) {
-    char backupPath[MAX];
+    char *backupPath = malloc(sizeof(char) * MAX);
     strcpy(backupPath, backupBase);
     char sourcePathCopy[MAX];
     strcpy(sourcePathCopy, sourcePath);
