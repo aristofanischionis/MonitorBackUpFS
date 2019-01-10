@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include "Headerfiles/defines.h"
 #include "Headerfiles/traverse.h"
 #include "Headerfiles/functions.h"
@@ -42,6 +43,11 @@ void traverseTrees(Tree *backupTree, List **sourceINodes,
         traverseTrees(backupTree, sourceINodes, backupINodes, sourceNode, backupPrev);
     }
     else if (kidCase == FILE_IN_BOTH) {
+        if (sourceNode->kid->data.inode == NULL) {
+            printf("source null %s\n", sourceNode->kid->data.name);
+        } else if (backupNode->kid->data.inode == NULL) {
+            printf("backup null %s\n", backupNode->kid->data.name);
+        }
         // if file has been modified update backup inode struct info
         if (sourceNode->kid->data.inode->modDate != backupNode->kid->data.inode->modDate 
         || sourceNode->kid->data.inode->size != backupNode->kid->data.inode->size) {
@@ -83,6 +89,11 @@ void traverseTrees(Tree *backupTree, List **sourceINodes,
         traverseTrees(backupTree, sourceINodes, backupINodes, sourceNode, backupPrev);
     }
     else if (siblingCase == FILE_IN_BOTH) {
+        if (sourceNode->sibling->data.inode == NULL) {
+            printf("source null %s\n", sourceNode->sibling->data.name);
+        } else if (backupNode->sibling->data.inode == NULL) {
+            printf("backup null %s\n", backupNode->sibling->data.name);
+        }
         // if file has been modified update backup inode struct info
         if (sourceNode->sibling->data.inode->modDate != backupNode->sibling->data.inode->modDate 
         || sourceNode->sibling->data.inode->size != backupNode->sibling->data.inode->size) {
@@ -108,7 +119,7 @@ int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
     // siblings or kids) but not in backup
     else if (backupNode == NULL) {
         // check if missing node is a file or a directory        
-        if (sourceNode->kid == NULL) {  // if it is a file
+        if (!isDirectory(sourceNode->data.path)) {  // if it is a file
             printf("file in source\n");
             return FILE_IN_SOURCE;
         } else {                        // if it is a directory
@@ -120,7 +131,7 @@ int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
     // siblings or kids) but not in source
     else if (sourceNode == NULL) {
         // check if missing node is a file or a directory        
-        if (backupNode->kid == NULL) {  // if it is a file
+        if (!isDirectory(backupNode->data.path)) {  // if it is a file
             printf("file in backup\n");
             return FILE_IN_BACKUP;
         } else {                        // if it is a directory
@@ -133,7 +144,7 @@ int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
         // check if this node has the same name
         int strCompare = strcmp(sourceNode->data.name, backupNode->data.name);
         // check if both are files
-        if (sourceNode->kid == NULL && backupNode->kid == NULL) {
+        if (!isDirectory(sourceNode->data.path) && !isDirectory(backupNode->data.path)) {
             // the file is in both trees
             if (strCompare == 0) {
                 printf("file in both\n");

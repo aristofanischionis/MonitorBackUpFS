@@ -30,8 +30,11 @@ void updateSourceTree(struct inotify_event *event, char *path,
         Data data;
         strcpy(data.path, path);
         strcpy(data.name, basename(pathCopy));
-        INode *node = addINode(&sourceList, path);
-        data.inode = node;
+        data.inode = NULL;
+        if (!isDirectory(path)) {
+            INode *node = addINode(&sourceList, path);
+            data.inode = node;
+        }
         addKid(previous, data);
         return;
     } else if (event->mask & IN_DELETE) {

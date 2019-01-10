@@ -13,8 +13,11 @@ int isDot(char *name);
 void makeBackup(char *source, char *backup);
 void makeDirectory(char *path, char *name);
 char* backupPath(char* sourcePath, char* backupBase);
+char *formatBackupPath(char *sourceBase, char *backupBase, char *sourcePath);
 void copy(char *source, char *dest);
 void fail(const char *message);
-void printStructures (Tree *sourceTree, Tree *backupTree, List *sourceINodes, List *backupINodes);
+int isDirectory(const char *path);
+void printStructures(Tree *sourceTree, Tree *backupTree, List *sourceINodes,
+                     List *backupINodes);
 
 #endif

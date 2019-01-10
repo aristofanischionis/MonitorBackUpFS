@@ -110,6 +110,7 @@ void makeDirectory(char *path, char *name) {
 
 // Make an identical path to sourcePath, but with backupBase as the root
 char *backupPath(char *sourcePath, char *backupBase) {
+    printf("source %s\n", sourcePath);
     const char s[2] = "/";
     char *token;
     char toCopy[100];
@@ -127,7 +128,25 @@ char *backupPath(char *sourcePath, char *backupBase) {
         sprintf(toCopy, "%s/", token);
         strcat(backup, toCopy);
     }
+    printf("backup %s\n", backup);
     return backup;
+}
+
+// Make an identical path to sourcePath, but with backupBase as the root
+char *formatBackupPath(char *sourceBase, char *backupBase, char *sourcePath) {
+    char backupPath[MAX];
+    strcpy(backupPath, backupBase);
+    char sourcePathCopy[MAX];
+    strcpy(sourcePathCopy, sourcePath);
+    size_t len = strlen(sourceBase);
+    if (len > 0) {
+        char *p = sourcePathCopy;
+        while ((p = strstr(p, sourceBase)) != NULL) {
+            memmove(p, p + len, strlen(p + len) + 1);
+        }
+    }
+    strcat(backupPath, sourcePathCopy);
+    return backupPath;
 }
 
 // Copy a source file or directory in the dest
@@ -165,7 +184,15 @@ void fail(const char *message) {
     exit(1);
 }
 
-void printStructures (Tree *sourceTree, Tree *backupTree, List *sourceINodes, List *backupINodes) {
+int isDirectory(const char *path) {
+   struct stat statbuf;
+   if (stat(path, &statbuf) != 0)
+       return 0;
+   return S_ISDIR(statbuf.st_mode);
+}
+
+void printStructures(Tree *sourceTree, Tree *backupTree, List *sourceINodes,
+                     List *backupINodes) {
     printf("\n\nSOURCE TREE:\n");
     printTree(sourceTree);
     printf("\n");

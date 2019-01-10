@@ -91,6 +91,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             char *source = (*map)[j].name;
             char eventPath[MAX];
             sprintf(eventPath, "%s%s", source, event->name);
+            printf("path %s\n", eventPath);
 
             // check for moved case
 
