@@ -1,68 +1,61 @@
+#include "Headerfiles/inotifyFunctions.h"
 #include <fcntl.h>
-#include <stdlib.h>
 #include <libgen.h>
+#include <stdlib.h>
 #include "Headerfiles/eventHandlers.h"
 #include "Headerfiles/functions.h"
-#include "Headerfiles/inotifyFunctions.h"
 #include "Headerfiles/traverse.h"
 
 // Add files to be watched by inotify
-int inotifyCode(char *source, char *backup, List *sourceINodes, List *backupINodes, Tree **sourceTree, Tree **backupTree)
-{
-	int watched;
-	int i;
-	WDmapping *map;
-	int fd; // descriptors returned from inotify subsystem
-	if (!strcmp(source, ""))
-		fail("Must specify path to watch");
+int inotifyCode(char *source, char *backup, List *sourceINodes,
+                List *backupINodes, Tree **sourceTree, Tree **backupTree) {
+        printf("filename %s\n", source);
+    int watched;
+    int i;
+    WDmapping *map;
+    int fd;  // descriptors returned from inotify subsystem
+    if (!strcmp(source, "")) fail("Must specify path to watch");
 
-	/*creating the INOTIFY instance*/
-	fd = inotify_init();
-	if (fd < 0)
-		fail("inotify_init");
+    /*creating the INOTIFY instance*/
+    fd = inotify_init();
+    if (fd < 0) fail("inotify_init");
 
-	watched = 0;
-	map = (WDmapping*)malloc(MAX_WD*sizeof(WDmapping));
-	// monitor root
+    watched = 0;
+    map = (WDmapping *)malloc(MAX_WD * sizeof(WDmapping));
+    // monitor root
 
-	strcpy(map[watched].name, source);
-	map[watched].wd = inotify_add_watch(fd, source,
-										IN_CREATE |
-											IN_MODIFY |
+    strcpy(map[watched].name, source);
+    map[watched].wd = inotify_add_watch(fd, source,
+                                        IN_CREATE | IN_MODIFY |
 
-											IN_ATTRIB |
-											IN_CLOSE_WRITE |
+                                            IN_ATTRIB | IN_CLOSE_WRITE |
 
-											IN_DELETE |
-											IN_DELETE_SELF |
+                                            IN_DELETE | IN_DELETE_SELF |
 
-											IN_MOVED_FROM |
-											IN_MOVED_TO);
+                                            IN_MOVED_FROM | IN_MOVED_TO);
 
-	if (map[watched].wd == -1)
-	{
-		fprintf(stderr, "Cannot watch '%s'\n", source);
-		perror("inotify_add_watch");
-		watched--;
-		exit(EXIT_FAILURE);
-	}
-	watched++;
-	
-	recursiveWatch(map[0].name, fd, &watched, &map);
+    if (map[watched].wd == -1) {
+        fprintf(stderr, "Cannot watch '%s'\n", source);
+        perror("inotify_add_watch");
+        watched--;
+        exit(EXIT_FAILURE);
+    }
+    watched++;
 
-	if (watched == 0)
-		fail("Nothing to watch!");
+    recursiveWatch(map[0].name, fd, &watched, &map);
 
-	printf("Listening for events!\n");
+    if (watched == 0) fail("Nothing to watch!");
 
-	handleEvents(fd, backup, sourceINodes, backupINodes, sourceTree, backupTree, &watched, &map);
+    printf("Listening for events!\n");
 
-	printf("I stopped listening for events!\n");
-	rmWD(map, watched, fd);
-	close(fd);
-	free(map);
+    handleEvents(fd, backup, sourceINodes, backupINodes, sourceTree, backupTree,
+                 &watched, &map);
+
+    printf("I stopped listening for events!\n");
+    rmWD(map, watched, fd);
+    close(fd);
+    free(map);
 }
-
 
 // Opens directories and adds thems to watch list
 void recursiveWatch(char *source, int fd, int *watched, WDmapping **map) {
@@ -107,18 +100,14 @@ void recursiveWatch(char *source, int fd, int *watched, WDmapping **map) {
 void addWatch(char *source, int fd, char *d_name, int *watched,
               WDmapping **map) {
     char path[MAX];
-    sprintf(path, "%s%s/", source, d_name);
+    sprintf(path, "%s/%s", source, d_name);
 
     strcpy((*map)[(*watched)].name, path);
 
-    (*map)[(*watched)].wd = inotify_add_watch(fd, path,
-                                              IN_CREATE | IN_MODIFY |
-
-                                                  IN_ATTRIB | IN_CLOSE_WRITE |
-
-                                                  IN_DELETE | IN_DELETE_SELF |
-
-                                                  IN_MOVED_FROM | IN_MOVED_TO);
+    (*map)[(*watched)].wd = inotify_add_watch(
+        fd, path,
+        IN_CREATE | IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE | IN_DELETE |
+            IN_DELETE_SELF | IN_MOVED_FROM | IN_MOVED_TO);
 
     if ((*map)[(*watched)].wd == -1) {
         fprintf(stderr, "Cannot watch '%s'\n", path);
@@ -126,7 +115,7 @@ void addWatch(char *source, int fd, char *d_name, int *watched,
         (*watched)--;
         exit(EXIT_FAILURE);
     }
-    
+
     (*watched)++;
 }
 

@@ -109,30 +109,6 @@ void makeDirectory(char *path, char *name) {
 }
 
 // Make an identical path to sourcePath, but with backupBase as the root
-char *backupPath(char *sourcePath, char *backupBase) {
-    printf("source %s\n", sourcePath);
-    const char s[2] = "/";
-    char *token;
-    char toCopy[100];
-    char *source, *backup;
-    source = malloc(MAX * sizeof(char));
-    backup = malloc(MAX * sizeof(char));
-    strcpy(source, sourcePath);
-    strcpy(backup, backupBase);
-
-    token = strtok(source, s);
-
-    while (token != NULL) {
-        token = strtok(NULL, s);
-        if (token == NULL) break;
-        sprintf(toCopy, "%s/", token);
-        strcat(backup, toCopy);
-    }
-    printf("backup %s\n", backup);
-    return backup;
-}
-
-// Make an identical path to sourcePath, but with backupBase as the root
 char *formatBackupPath(char *sourceBase, char *backupBase, char *sourcePath) {
     char *backupPath = malloc(sizeof(char) * MAX);
     strcpy(backupPath, backupBase);

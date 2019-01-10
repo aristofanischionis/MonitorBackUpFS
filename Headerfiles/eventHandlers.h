@@ -14,7 +14,7 @@
 #define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
 
 // Functions to handle an event
-void useFunction(struct inotify_event *event, int fd, char *path, char *backup,
+void makeAction(struct inotify_event *event, int fd, char *path, char *sourceBase, char *backup,
                  List *sourceList, List *backupList, int *watched,
                  WDmapping **map, int wd);
 const char *eventName(struct inotify_event *event);

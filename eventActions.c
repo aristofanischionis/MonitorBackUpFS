@@ -9,11 +9,12 @@
 extern int cookieValue1;
 extern char movedName[MAX];;
 
-void createMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map){
+void createMode(struct inotify_event *event, int fd, char* path, char *sourceBase, char* backup, List* sourceList, int *watched, WDmapping** map){
     INode *inode;
     char *backupTo;
     backupTo = malloc(MAX * sizeof(char));
-    backupTo = backupPath(path, backup);
+    // backupTo = backupPath(path, backup);
+    backupTo = formatBackupPath(sourceBase, backup, path);
     if (event->mask & IN_ISDIR){
         makeDirectory(backupTo, event->name);
         
@@ -51,7 +52,7 @@ void createMode(struct inotify_event *event, int fd, char* path, char* backup, L
 
 }
 
-void attribMode(struct inotify_event *event, char* path, char* backup, List* sourceList){
+void attribMode(struct inotify_event *event, char* path, char *sourceBase, char* backup, List* sourceList){
     struct stat statbuf;
     INode* inode;
     char buf[MAX];
@@ -59,7 +60,8 @@ void attribMode(struct inotify_event *event, char* path, char* backup, List* sou
     char* bPath;
     sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
     bPath = malloc(MAX * sizeof(char));
-    bPath = backupPath(path, backup);
+    // bPath = backupPath(path, backup);
+    bPath = formatBackupPath(sourceBase, backup, path);
     sprintf(bPath, "%s%s", bPath, event->name);
     // 
     if (!(event->mask & IN_ISDIR)){
@@ -92,13 +94,14 @@ void attribMode(struct inotify_event *event, char* path, char* backup, List* sou
     free(bPath);
 }
 
-void modifyMode(struct inotify_event *event, char* path, char* backup, List* backupList){
+void modifyMode(struct inotify_event *event, char* path, char *sourceBase, char* backup, List* backupList){
     struct stat statbuf;
     INode* inode;
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    bPath = backupPath(path, backup);
+    // bPath = backupPath(path, backup);
+    bPath = formatBackupPath(sourceBase, backup, path);
     //
     sprintf(bPath, "%s%s", bPath, event->name);
     if (!(event->mask & IN_ISDIR)){
@@ -114,7 +117,7 @@ void modifyMode(struct inotify_event *event, char* path, char* backup, List* bac
     free(bPath);
 }
 
-void closeWriteMode(struct inotify_event *event, char* path, char* backup, List* backupList){
+void closeWriteMode(struct inotify_event *event, char* path, char *sourceBase, char* backup, List* backupList){
     char fullPath[MAX];
     struct stat statbuf;
     INode* inode;
@@ -122,7 +125,8 @@ void closeWriteMode(struct inotify_event *event, char* path, char* backup, List*
     char buf1[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    bPath = backupPath(path, backup);
+    // bPath = backupPath(path, backup);
+    bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s%s", bPath, event->name);
     sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
@@ -149,12 +153,13 @@ void closeWriteMode(struct inotify_event *event, char* path, char* backup, List*
     free(bPath);
 }
 
-void deleteMode(struct inotify_event *event, char* path, char* backup){
+void deleteMode(struct inotify_event *event, char* path, char *sourceBase, char* backup){
     // char fullPath[MAX];
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    bPath = backupPath(path, backup);
+    // bPath = backupPath(path, backup);
+    bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s%s", bPath, event->name);
     if (!(event->mask & IN_ISDIR)){
@@ -166,11 +171,12 @@ void deleteMode(struct inotify_event *event, char* path, char* backup){
     free(bPath);
 }
 
-void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, char* backup){
+void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, char *sourceBase, char* backup){
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    bPath = backupPath(path, backup);
+    // bPath = backupPath(path, backup);
+    bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s/", realpath(bPath, buf));
    
@@ -183,7 +189,7 @@ void deleteSelfMode(struct inotify_event *event, int fd, int wd, char* path, cha
 }
 
 // file moved outside the watched dir
-void movedFromMode(struct inotify_event *event, char* path, char* backup){
+void movedFromMode(struct inotify_event *event, char* path, char *sourceBase, char* backup){
     // have to wait for the next event check if it is moved to and then check the cookie field
     // if cookie is the same the file remains in the same folder just under different name
     // event->cookie
@@ -191,7 +197,8 @@ void movedFromMode(struct inotify_event *event, char* path, char* backup){
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    bPath = backupPath(path, backup);
+    // bPath = backupPath(path, backup);
+    bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s/", realpath(bPath, buf));
     sprintf(bPath, "%s%s", bPath, event->name);
@@ -201,11 +208,12 @@ void movedFromMode(struct inotify_event *event, char* path, char* backup){
 }
 
 // file moved inside the watched dir
-void movedToMode(struct inotify_event *event, int fd, char* path, char* backup, List* sourceList, int *watched, WDmapping** map){
+void movedToMode(struct inotify_event *event, int fd, char* path, char *sourceBase, char* backup, List* sourceList, int *watched, WDmapping** map){
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    bPath = backupPath(path, backup);
+    // bPath = backupPath(path, backup);
+    bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s/", realpath(bPath, buf));
     sprintf(bPath, "%s%s", bPath, event->name);
@@ -218,7 +226,7 @@ void movedToMode(struct inotify_event *event, int fd, char* path, char* backup, 
         // delete the movedname afterwards we don't need it there
     }
     else {
-        createMode(event, fd, path, backup, sourceList, watched, map);
+        createMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
         copy(movedName, bPath);
     }
     cookieValue1 = 0;

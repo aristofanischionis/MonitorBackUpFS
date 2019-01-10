@@ -90,7 +90,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
 
             char *source = (*map)[j].name;
             char eventPath[MAX];
-            sprintf(eventPath, "%s%s", source, event->name);
+            sprintf(eventPath, "%s/%s", source, event->name);
             printf("path %s\n", eventPath);
 
             // check for moved case
@@ -108,7 +108,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             }
 
             // call the function to handle the event
-            useFunction(event, fd, source, backup, sourceList, backupList,
+            makeAction(event, fd, source, (*sourceTree)->root->data.path, backup, sourceList, backupList,
                         watched, map, wd);
 
             // Update logical structures
@@ -154,33 +154,33 @@ const char *eventName(struct inotify_event *event) {
         return "unknown event";
 }
 
-void useFunction(struct inotify_event *event, int fd, char *path, char *backup,
-                 List *sourceList, List *backupList, int *watched,
-                 WDmapping **map, int wd) {
+void makeAction(struct inotify_event *event, int fd, char *path,
+                 char *sourceBase, char *backup, List *sourceList,
+                 List *backupList, int *watched, WDmapping **map, int wd) {
     if (event->mask & IN_ATTRIB) {
         printf("\nIN ATTRIB %s : \n", event->name);
-        attribMode(event, path, backup, sourceList);
+        attribMode(event, path, sourceBase, backup, sourceList);
     } else if (event->mask & IN_CLOSE_WRITE) {
         printf("\nIN CLOSE WRITE %s\n", event->name);
-        closeWriteMode(event, path, backup, backupList);
+        closeWriteMode(event, path, sourceBase, backup, backupList);
     } else if (event->mask & IN_CREATE) {
         printf("\nCREATE %s : \n", event->name);
-        createMode(event, fd, path, backup, sourceList, watched, map);
+        createMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
     } else if (event->mask & IN_DELETE) {
         printf("\nIN DELETE %s : \n", event->name);
-        deleteMode(event, path, backup);
+        deleteMode(event, path, sourceBase, backup);
     } else if (event->mask & IN_DELETE_SELF) {
         printf("\nIN DELETE SELF %s : \n", event->name);
-        deleteSelfMode(event, fd, wd, path, backup);
+        deleteSelfMode(event, fd, wd, path, sourceBase, backup);
     } else if (event->mask & IN_MODIFY) {
         printf("\nIN MODIFY %s : \n", event->name);
-        modifyMode(event, path, backup, backupList);
+        modifyMode(event, path, sourceBase, backup, backupList);
     } else if (event->mask & IN_MOVED_FROM) {
         printf("\nIN MOVE IN %s : \n", event->name);
-        movedFromMode(event, path, backup);
+        movedFromMode(event, path, sourceBase, backup);
     } else if (event->mask & IN_MOVED_TO) {
         printf("\nIN MOVE OUT %s : \n", event->name);
-        movedToMode(event, fd, path, backup, sourceList, watched, map);
+        movedToMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
     } else {
         return;
     }

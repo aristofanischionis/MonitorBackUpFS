@@ -96,9 +96,9 @@ void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
     }
     else if (siblingCase == FILE_IN_BOTH) {
         if (sourceNode->sibling->data.inode == NULL) {
-            printf("source null %s\n", sourceNode->sibling->data.name);
+            printf("source is null %s\n", sourceNode->sibling->data.name);
         } else if (backupNode->sibling->data.inode == NULL) {
-            printf("backup null %s\n", backupNode->sibling->data.name);
+            printf("backup is null %s\n", backupNode->sibling->data.name);
         }
         // if file has been modified update backup inode struct info
         if (sourceNode->sibling->data.inode->modDate != backupNode->sibling->data.inode->modDate 

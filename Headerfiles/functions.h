@@ -12,7 +12,6 @@
 int isDot(char *name);
 void makeBackup(char *source, char *backup);
 void makeDirectory(char *path, char *name);
-char* backupPath(char* sourcePath, char* backupBase);
 char *formatBackupPath(char *sourceBase, char *backupBase, char *sourcePath);
 void copy(char *source, char *dest);
 void fail(const char *message);
