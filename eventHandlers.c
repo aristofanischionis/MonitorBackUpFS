@@ -91,7 +91,12 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             char *source = (*map)[j].name;
             char eventPath[MAX];
             sprintf(eventPath, "%s/%s", source, event->name);
-            printf("path %s\n", eventPath);
+            // remove '/' character if it exists at the end of the eventPath
+            // (strlen(eventPath)-2] because of end of text character)
+            if (eventPath[strlen(eventPath)-2] == '/') {
+                eventPath[strlen(eventPath)-2] = 0;
+            }
+            printf("event path in handleEvents: %s\n", eventPath);
 
             // check for moved case
 
@@ -109,10 +114,10 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
 
             // call the function to handle the event
             makeAction(event, fd, source, (*sourceTree)->root->data.path, backup, sourceList, backupList,
-                        watched, map, wd);
+                        watched, map, wd, eventPath, sourceTree);
 
             // Update logical structures
-            updateSourceTree(event, eventPath, sourceTree, sourceList);
+            // updateSourceTree(event, eventPath, sourceTree, sourceList);
             traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
                           (*sourceTree)->root, (*backupTree)->root);
             printStructures(*sourceTree, *backupTree, sourceList, backupList);
@@ -154,34 +159,47 @@ const char *eventName(struct inotify_event *event) {
         return "unknown event";
 }
 
+// Function that makes changes on physical structure and on source tree
 void makeAction(struct inotify_event *event, int fd, char *path,
-                 char *sourceBase, char *backup, List *sourceList,
-                 List *backupList, int *watched, WDmapping **map, int wd) {
+                char *sourceBase, char *backup, List *sourceList,
+                List *backupList, int *watched, WDmapping **map, int wd,
+                char *eventPath, Tree **sourceTree) {
     if (event->mask & IN_ATTRIB) {
         printf("\nIN ATTRIB %s : \n", event->name);
         attribMode(event, path, sourceBase, backup, sourceList);
-    } else if (event->mask & IN_CLOSE_WRITE) {
+    } 
+    else if (event->mask & IN_CLOSE_WRITE) {
         printf("\nIN CLOSE WRITE %s\n", event->name);
         closeWriteMode(event, path, sourceBase, backup, backupList);
-    } else if (event->mask & IN_CREATE) {
+    } 
+    else if (event->mask & IN_CREATE) {
         printf("\nCREATE %s : \n", event->name);
         createMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
-    } else if (event->mask & IN_DELETE) {
+        updateTreeCreate(eventPath, sourceTree, sourceList);
+    } 
+    else if (event->mask & IN_DELETE) {
         printf("\nIN DELETE %s : \n", event->name);
+        updateTreeDelete(eventPath, sourceTree, sourceList);
         deleteMode(event, path, sourceBase, backup);
-    } else if (event->mask & IN_DELETE_SELF) {
+    } 
+    else if (event->mask & IN_DELETE_SELF) {
         printf("\nIN DELETE SELF %s : \n", event->name);
+        updateTreeDeleteSelf(eventPath, sourceTree, sourceList);
         deleteSelfMode(event, fd, wd, path, sourceBase, backup);
-    } else if (event->mask & IN_MODIFY) {
+    } 
+    else if (event->mask & IN_MODIFY) {
         printf("\nIN MODIFY %s : \n", event->name);
         modifyMode(event, path, sourceBase, backup, backupList);
-    } else if (event->mask & IN_MOVED_FROM) {
+    } 
+    else if (event->mask & IN_MOVED_FROM) {
         printf("\nIN MOVE IN %s : \n", event->name);
         movedFromMode(event, path, sourceBase, backup);
-    } else if (event->mask & IN_MOVED_TO) {
+    } 
+    else if (event->mask & IN_MOVED_TO) {
         printf("\nIN MOVE OUT %s : \n", event->name);
         movedToMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
-    } else {
+    } 
+    else {
         return;
     }
 }

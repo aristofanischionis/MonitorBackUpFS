@@ -19,7 +19,6 @@ List * initializeList(void) {
 INode * addINode(List **list, char *path) {
     struct stat buf;
     if (stat(path, &buf) == -1) {
-        printf("wrong path %s\n", path);
         perror("Error using stat");
         return NULL;
     }

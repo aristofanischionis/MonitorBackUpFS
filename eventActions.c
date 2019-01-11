@@ -25,8 +25,8 @@ void createMode(struct inotify_event *event, int fd, char* path, char *sourceBas
         char newPath[MAX];
         
         // make paths
-        sprintf(oldPath, "%s%s", path, event->name);
-        sprintf(newPath, "%s%s", backupTo, event->name);
+        sprintf(oldPath, "%s/%s", path, event->name);
+        sprintf(newPath, "%s/%s", backupTo, event->name);
         // check inode
         inode = searchForINodeByPath(sourceList, oldPath);
         // if(inode == NULL) fail("Inode can't be retrieved properly\n");
@@ -62,7 +62,7 @@ void attribMode(struct inotify_event *event, char* path, char *sourceBase, char*
     bPath = malloc(MAX * sizeof(char));
     // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
-    sprintf(bPath, "%s%s", bPath, event->name);
+    sprintf(bPath, "%s/%s", bPath, event->name);
     // 
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
@@ -128,7 +128,7 @@ void closeWriteMode(struct inotify_event *event, char* path, char *sourceBase, c
     // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
     
-    sprintf(bPath, "%s%s", bPath, event->name);
+    sprintf(bPath, "%s/%s", bPath, event->name);
     sprintf(fullPath, "%s/%s",realpath(path, buf), event->name);
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
@@ -161,7 +161,7 @@ void deleteMode(struct inotify_event *event, char* path, char *sourceBase, char*
     // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
     
-    sprintf(bPath, "%s%s", bPath, event->name);
+    sprintf(bPath, "%s/%s", bPath, event->name);
     if (!(event->mask & IN_ISDIR)){
         // if it is a file
         if (unlink(bPath) != 0){
@@ -201,7 +201,7 @@ void movedFromMode(struct inotify_event *event, char* path, char *sourceBase, ch
     bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s/", realpath(bPath, buf));
-    sprintf(bPath, "%s%s", bPath, event->name);
+    sprintf(bPath, "%s/%s", bPath, event->name);
     cookieValue1 = event->cookie;
     strcpy(movedName, bPath);
     free(bPath);
@@ -216,7 +216,7 @@ void movedToMode(struct inotify_event *event, int fd, char* path, char *sourceBa
     bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s/", realpath(bPath, buf));
-    sprintf(bPath, "%s%s", bPath, event->name);
+    sprintf(bPath, "%s/%s", bPath, event->name);
 
     if(cookieValue1 == event->cookie){
         // it is the same hierarchy

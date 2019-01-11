@@ -70,7 +70,7 @@ TreeNode* addKid(TreeNode *node, Data data) {
 }
 
 TreeNode * searchByPath(TreeNode *node, char *path) {
-    if(node == NULL){
+    if(node == NULL || strcmp(path, "")){
         return NULL;
     } 
     if(!strcmp(node->data.path, path)){

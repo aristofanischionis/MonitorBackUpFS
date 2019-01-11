@@ -14,12 +14,13 @@
 #define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
 
 // Functions to handle an event
-void makeAction(struct inotify_event *event, int fd, char *path, char *sourceBase, char *backup,
-                 List *sourceList, List *backupList, int *watched,
-                 WDmapping **map, int wd);
-const char *eventName(struct inotify_event *event);
 void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
                   Tree **sourceTree, Tree **backupTree, int *watched,
                   WDmapping **map);
+void makeAction(struct inotify_event *event, int fd, char *path,
+                char *sourceBase, char *backup, List *sourceList,
+                List *backupList, int *watched, WDmapping **map, int wd,
+                char *eventPath, Tree **sourceTree);
+const char *eventName(struct inotify_event *event);
 
 #endif

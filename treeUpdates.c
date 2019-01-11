@@ -12,48 +12,55 @@
 #include <libgen.h>
 #include "Headerfiles/treeUpdates.h"
 
-// Depending on the event, update the source tree structure
-void updateSourceTree(struct inotify_event *event, char *path,
-                      Tree **sourceTree, List *sourceList) {
-    if (event->mask & IN_ATTRIB) {
-        return;
-    } else if (event->mask & IN_CLOSE_WRITE) {
-        return;
-    } else if (event->mask & IN_CREATE) {
-        // make a copy of path to pass so that it doesn't change when passed to
-        // functions
-        char *pathCopy = malloc(strlen(path) + 1);
-        strcpy(pathCopy, path);
-        TreeNode *previous =
-            searchByPath((*sourceTree)->root, dirname(pathCopy));
-        strcpy(pathCopy, path);
-        Data data;
-        strcpy(data.path, path);
-        strcpy(data.name, basename(pathCopy));
-        data.inode = NULL;
-        if (!isDirectory(path)) {
-            INode *node = addINode(&sourceList, path);
-            data.inode = node;
-        }
-        addKid(previous, data);
-        return;
-    } else if (event->mask & IN_DELETE) {
-        TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
-        deleteINode(&sourceList, nodeFound->data.inode->inodeNum,
-                    nodeFound->data.name);
-        deleteNode(*sourceTree, nodeFound);
-        return;
-    } else if (event->mask & IN_DELETE_SELF) {
-        TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
-        deleteNode(*sourceTree, nodeFound);
-        return;
-    } else if (event->mask & IN_MODIFY) {
-        return;
-    } else if (event->mask & IN_MOVED_FROM) {
-        return;
-    } else if (event->mask & IN_MOVED_TO) {
-        return;
+void updateTreeCreate(char *path, Tree **sourceTree, List *sourceList) {
+    // make a copy of path to pass so that it doesn't change when passed to
+    // functions
+    char *pathCopy = malloc(strlen(path) + 1);
+    strcpy(pathCopy, path);
+    TreeNode *previous =
+        searchByPath((*sourceTree)->root, dirname(pathCopy));
+    strcpy(pathCopy, path);
+    Data data;
+    strcpy(data.path, path);
+    strcpy(data.name, basename(pathCopy));
+    data.inode = NULL;
+    // if a file was added, add an inode
+    if (!isDirectory(path)) {
+        printf("file created\n");
+        INode *node = addINode(&sourceList, path);
+        data.inode = node;
     }
+    printf("dir created\n");
+    addKid(previous, data);
+    return;
+}
+
+void updateTreeDelete(char *path, Tree **sourceTree, List *sourceList) {
+    // if a file will be deleted, unlink
+    // I can't call isDirectory because the real path doesn't exist in the source file
+    // so I check if the inode of tis tree node is null (directories don't have an inode)
+    TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
+    if (sourceNode != NULL && sourceNode->data.inode != NULL) {
+        deleteINode(&sourceList, sourceNode->data.inode->inodeNum,
+                    sourceNode->data.name);
+        deleteNode(*sourceTree, sourceNode);
+    }
+    
+    return;
+}
+
+void updateTreeDeleteSelf(char *path, Tree **sourceTree, List *sourceList) {   
+    // it concerns only a catalog
+    printf("file delete\n");
+    // I can't call isDirectory because the real path doesn't exist in the source file
+    // so I check if the inode of tis tree node is null (directories don't have an inode)
+    TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
+    if (sourceNode != NULL && sourceNode->data.inode == NULL) {
+        printf("dic delete\n");
+        TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
+        deleteNode(*sourceTree, nodeFound);
+    }
+    return;
 }
 
 void readDirectory(char *filename, List **list, TreeNode *previous) {
@@ -66,7 +73,7 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
         exit(EXIT_FAILURE);
     } else {
         while ((direntp = readdir(file_ptr)) != NULL) {
-            // remove '\' character if it exists at the end of the filename
+            // remove '/' character if it exists at the end of the filename
             if (filename[strlen(filename)-1] == '/') {
                 filename[strlen(filename)-1] = 0;
             }
