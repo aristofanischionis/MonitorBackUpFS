@@ -1,10 +1,10 @@
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include "Headerfiles/namelist.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Allocate memory for list of names struct
-NameList * initializeNameList(void) {
+NameList *initializeNameList(void) {
     NameList *list = NULL;
     list = malloc(sizeof(NameList));
     list->head = NULL;
@@ -29,7 +29,7 @@ int addName(NameList **list, char *name) {
 }
 
 // Find if a name exists and return it else return null
-NameListNode * searchForName(NameList *list, char *name) {
+NameListNode *searchForName(NameList *list, char *name) {
     // if list is empty return null
     if (list->head == NULL) {
         return NULL;
@@ -83,18 +83,19 @@ int deleteName(NameList **list, char *name) {
         prev = prev->next;
     }
 
-    NameListNode *n = prev->next;        //the node to be deleted
-    //check if node really exists in list (because prev pointer might have reached end of list)
+    NameListNode *n = prev->next;  // the node to be deleted
+    // check if node really exists in list (because prev pointer might have
+    // reached end of list)
     if (prev->next == NULL) {
         return 1;
     }
 
-    //remove node from list and make previous node point to the next one of the deleted
+    // remove node from list and make previous node point to the next one of the
+    // deleted
     prev->next = n->next;
     free(n);
 
     return 0;
-
 }
 
 void deleteNameList(NameList **list) {
@@ -108,4 +109,3 @@ void deleteNameList(NameList **list) {
         current = next;
     }
 }
-

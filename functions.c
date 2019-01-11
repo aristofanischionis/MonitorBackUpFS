@@ -1,17 +1,17 @@
+#include "Headerfiles/functions.h"
+#include <dirent.h>
+#include <errno.h>
+#include <libgen.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
+#include <sys/types.h>
 #include <sys/wait.h>
-#include <limits.h>
-#include <libgen.h>
-#include "Headerfiles/functions.h"
-#include "Headerfiles/tree.h"
+#include <unistd.h>
 #include "Headerfiles/defines.h"
+#include "Headerfiles/tree.h"
 
 int isDot(char *name) {
     return (((!strcmp(name, ".")) || (!strcmp(name, ".."))) ? (1) : (0));
@@ -124,15 +124,14 @@ char *formatBackupPath(char *sourceBase, char *backupBase, char *sourcePath) {
     strcat(backupPath, sourcePathCopy);
     // remove '/' character if it exists at the end of the source path
     // (strlen(eventPath)-2] because of end of text character)
-    if (backupPath[strlen(backupPath)-1] == '/') {
-        backupPath[strlen(backupPath)-1] = 0;
+    if (backupPath[strlen(backupPath) - 1] == '/') {
+        backupPath[strlen(backupPath) - 1] = 0;
     }
     return backupPath;
 }
 
 // Copy a source file or directory in the dest
-void copy(char *source, char *dest)
-{
+void copy(char *source, char *dest) {
     int childExitStatus;
     pid_t pid;
     int status;
@@ -145,15 +144,12 @@ void copy(char *source, char *dest)
 
     if (pid == 0) {
         execl("/bin/cp", "/bin/cp", "-a", source, dest, (char *)0);
-    }
-    else if (pid < 0) {
+    } else if (pid < 0) {
         perror("pid<0 in copy\n");
         exit(1);
-    }
-    else {
-        pid_t ws = waitpid( pid, &childExitStatus, WNOHANG);
-        if (ws == -1)
-        {
+    } else {
+        pid_t ws = waitpid(pid, &childExitStatus, WNOHANG);
+        if (ws == -1) {
             perror("waitpid error in copy\n");
             exit(1);
         }
@@ -166,10 +162,9 @@ void fail(const char *message) {
 }
 
 int isDirectory(const char *path) {
-   struct stat statbuf;
-   if (stat(path, &statbuf) != 0)
-       return 0;
-   return S_ISDIR(statbuf.st_mode);
+    struct stat statbuf;
+    if (stat(path, &statbuf) != 0) return 0;
+    return S_ISDIR(statbuf.st_mode);
 }
 
 void printStructures(Tree *sourceTree, Tree *backupTree, List *sourceINodes,
@@ -187,4 +182,3 @@ void printStructures(Tree *sourceTree, Tree *backupTree, List *sourceINodes,
     printINodes(backupINodes);
     printf("\n");
 }
-

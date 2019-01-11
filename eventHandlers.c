@@ -1,15 +1,15 @@
+#include "Headerfiles/eventHandlers.h"
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include "Headerfiles/eventHandlers.h"
-#include "Headerfiles/inotifyFunctions.h"
+#include <unistd.h>
 #include "Headerfiles/eventActions.h"
 #include "Headerfiles/functions.h"
-#include "Headerfiles/treeUpdates.h"
+#include "Headerfiles/inotifyFunctions.h"
 #include "Headerfiles/traverse.h"
+#include "Headerfiles/treeUpdates.h"
 
 volatile sig_atomic_t running;
 int cookieValue1 = 0;
@@ -92,17 +92,18 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             strcpy(source, (*map)[j].name);
             // remove '/' character if it exists at the end of the source path
             // (strlen(eventPath)-2] because of end of text character)
-            if (source[strlen(source)-1] == '/') {
-                source[strlen(source)-1] = 0;
+            if (source[strlen(source) - 1] == '/') {
+                source[strlen(source) - 1] = 0;
             }
             char eventPath[MAX];
             sprintf(eventPath, "%s/%s", source, event->name);
             // remove '/' character if it exists at the end of the eventPath
             // (strlen(eventPath)-2] because of end of text character)
-            if (eventPath[strlen(eventPath)-2] == '/') {
-                eventPath[strlen(eventPath)-2] = 0;
+            if (eventPath[strlen(eventPath) - 2] == '/') {
+                eventPath[strlen(eventPath) - 2] = 0;
             }
-            printf("event path in handleEvents: %s, source: %s\n", eventPath, source);
+            printf("event path in handleEvents: %s, source: %s\n", eventPath,
+                   source);
 
             // check for moved case
 
@@ -110,7 +111,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
                 // check for moved case
                 if (event->mask & IN_MOVED_TO) {
                     // just go to use Function
-                } else {      
+                } else {
                     if (unlink(movedName) == 0) {
                         // clear the movedName
                         memset(movedName, 0, sizeof(movedName));
@@ -119,8 +120,9 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             }
 
             // call the function to handle the event
-            makeAction(event, fd, source, (*sourceTree)->root->data.path, backup, sourceList, backupList,
-                        watched, map, wd, eventPath, sourceTree, backupTree);
+            makeAction(event, fd, source, (*sourceTree)->root->data.path,
+                       backup, sourceList, backupList, watched, map, wd,
+                       eventPath, sourceTree, backupTree);
             // print inodes and trees
             printStructures(*sourceTree, *backupTree, sourceList, backupList);
 
@@ -169,45 +171,39 @@ void makeAction(struct inotify_event *event, int fd, char *path,
     if (event->mask & IN_ATTRIB) {
         printf("\nIN ATTRIB %s : \n", event->name);
         attribMode(event, path, sourceBase, backup, sourceList);
-    } 
-    else if (event->mask & IN_CLOSE_WRITE) {
+    } else if (event->mask & IN_CLOSE_WRITE) {
         printf("\nIN CLOSE WRITE %s\n", event->name);
         closeWriteMode(event, path, sourceBase, backup, backupList);
-    } 
-    else if (event->mask & IN_CREATE) {
+    } else if (event->mask & IN_CREATE) {
         printf("\nCREATE %s : \n", event->name);
-        createMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
+        createMode(event, fd, path, sourceBase, backup, sourceList, watched,
+                   map);
         updateTreeCreate(eventPath, sourceTree, sourceList);
-        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
-                          (*sourceTree)->root, (*backupTree)->root);
-    } 
-    else if (event->mask & IN_DELETE) {
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
+                      &backupList, (*sourceTree)->root, (*backupTree)->root);
+    } else if (event->mask & IN_DELETE) {
         printf("\nIN DELETE %s : \n", event->name);
         updateTreeDelete(eventPath, sourceTree, sourceList);
-        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
-                          (*sourceTree)->root, (*backupTree)->root);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
+                      &backupList, (*sourceTree)->root, (*backupTree)->root);
         deleteMode(event, path, sourceBase, backup);
-    } 
-    else if (event->mask & IN_DELETE_SELF) {
+    } else if (event->mask & IN_DELETE_SELF) {
         printf("\nIN DELETE SELF %s : \n", event->name);
         updateTreeDeleteSelf(eventPath, sourceTree, sourceList);
-        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
-                          (*sourceTree)->root, (*backupTree)->root);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
+                      &backupList, (*sourceTree)->root, (*backupTree)->root);
         deleteSelfMode(event, fd, wd, path, sourceBase, backup);
-    } 
-    else if (event->mask & IN_MODIFY) {
+    } else if (event->mask & IN_MODIFY) {
         printf("\nIN MODIFY %s : \n", event->name);
         modifyMode(event, path, sourceBase, backup, backupList);
-    } 
-    else if (event->mask & IN_MOVED_FROM) {
+    } else if (event->mask & IN_MOVED_FROM) {
         printf("\nIN MOVE IN %s : \n", event->name);
         movedFromMode(event, path, sourceBase, backup);
-    } 
-    else if (event->mask & IN_MOVED_TO) {
+    } else if (event->mask & IN_MOVED_TO) {
         printf("\nIN MOVE OUT %s : \n", event->name);
-        movedToMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
-    } 
-    else {
+        movedToMode(event, fd, path, sourceBase, backup, sourceList, watched,
+                    map);
+    } else {
         return;
     }
 }

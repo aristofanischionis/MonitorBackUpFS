@@ -1,9 +1,9 @@
 #ifndef EVENTACTIONS_HEADER
 #define EVENTACTIONS_HEADER
 
+#include <sys/inotify.h>
 #include "list.h"
 #include "monitoring.h"
-#include <sys/inotify.h>
 
 // Functions that implement the algorithms for each event
 void createMode(struct inotify_event* event, int fd, char* path,

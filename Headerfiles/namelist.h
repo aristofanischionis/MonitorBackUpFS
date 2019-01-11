@@ -12,9 +12,9 @@ typedef struct NameList {
     NameListNode *head;
 } NameList;
 
-NameList * initializeNameList(void);
+NameList *initializeNameList(void);
 int addName(NameList **list, char *name);
-NameListNode * searchForName(NameList *list, char *name);
+NameListNode *searchForName(NameList *list, char *name);
 void printNames(NameList *list);
 int deleteName(NameList **list, char *name);
 void deleteNameList(NameList **list);

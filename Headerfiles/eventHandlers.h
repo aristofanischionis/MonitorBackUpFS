@@ -2,8 +2,8 @@
 #define EVENTHANDLERS_HEADER
 
 #include <sys/inotify.h>
-#include "monitoring.h"
 #include "list.h"
+#include "monitoring.h"
 #include "tree.h"
 
 // The fixed size of the event buffer:

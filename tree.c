@@ -1,10 +1,10 @@
+#include "Headerfiles/tree.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "Headerfiles/tree.h"
 
 // Initiaize tree with the given data as root node
-Tree* initializeTree(Data data) {
+Tree *initializeTree(Data data) {
     Tree *tree = NULL;
     tree = malloc(sizeof(Tree));
     tree->root = newNode(data);
@@ -13,7 +13,7 @@ Tree* initializeTree(Data data) {
 }
 
 // Initialize a new tree node with the given data
-TreeNode* newNode(Data data) {
+TreeNode *newNode(Data data) {
     TreeNode *node = (TreeNode *)malloc(sizeof(TreeNode));
 
     if (node) {
@@ -27,7 +27,7 @@ TreeNode* newNode(Data data) {
 }
 
 // Add a sibling to the tree level of the given node
-TreeNode* addSiblingSorted(TreeNode *node, Data data) {
+TreeNode *addSiblingSorted(TreeNode *node, Data data) {
     // we have to find the node that will be next of the given one
     TreeNode *next = node;
     if (node == NULL) {
@@ -36,7 +36,7 @@ TreeNode* addSiblingSorted(TreeNode *node, Data data) {
     TreeNode *prev;
     // sort from a->z
     while (next != NULL) {
-        if(strcmp(next->data.name, data.name) >= 0) break;
+        if (strcmp(next->data.name, data.name) >= 0) break;
         prev = next;
         next = next->sibling;
     }
@@ -47,7 +47,7 @@ TreeNode* addSiblingSorted(TreeNode *node, Data data) {
 }
 
 // Add a kid to the given node
-TreeNode* addKid(TreeNode *node, Data data) {
+TreeNode *addKid(TreeNode *node, Data data) {
     if (node == NULL) {
         printf("addKid: Node is null\n");
         return NULL;
@@ -70,23 +70,23 @@ TreeNode* addKid(TreeNode *node, Data data) {
     }
 }
 
-TreeNode * searchByPath(TreeNode *node, char *path) {
-    if(node == NULL || !strcmp(path, "")){
+TreeNode *searchByPath(TreeNode *node, char *path) {
+    if (node == NULL || !strcmp(path, "")) {
         return NULL;
-    } 
-    if(!strcmp(node->data.path, path)){
+    }
+    if (!strcmp(node->data.path, path)) {
         return node;
-    } 
+    }
 
     TreeNode *nodeKid = NULL;
     TreeNode *nodeSibling = NULL;
-    if(node->kid != NULL){
+    if (node->kid != NULL) {
         nodeKid = searchByPath(node->kid, path);
-    } 
-    if(node->sibling != NULL){
+    }
+    if (node->sibling != NULL) {
         nodeSibling = searchByPath(node->sibling, path);
-    } 
-    
+    }
+
     if (nodeKid != NULL) {
         return nodeKid;
     } else {
@@ -94,9 +94,9 @@ TreeNode * searchByPath(TreeNode *node, char *path) {
     }
 }
 
-void deleteKids(TreeNode* node) {
-    // if the node is null (e.g. if delete was called for kids but there are no kids)
-    // then return
+void deleteKids(TreeNode *node) {
+    // if the node is null (e.g. if delete was called for kids but there are no
+    // kids) then return
     if (node == NULL) {
         return;
     }
@@ -113,8 +113,8 @@ void deleteKids(TreeNode* node) {
     free(node);
 }
 
-TreeNode *findPrevious(TreeNode *node, Data data){
-    if((node == NULL) || (!strcmp(data.name, ""))) {
+TreeNode *findPrevious(TreeNode *node, Data data) {
+    if ((node == NULL) || (!strcmp(data.name, ""))) {
         return NULL;
     }
 
@@ -137,8 +137,7 @@ TreeNode *findPrevious(TreeNode *node, Data data){
     findPrevious(node->kid, data);
 }
 
-TreeNode * deleteNode(Tree *tree, TreeNode *node) {
-
+TreeNode *deleteNode(Tree *tree, TreeNode *node) {
     if (node == NULL) {
         printf("Couldn't find the node to remove\n");
         return NULL;
@@ -153,9 +152,11 @@ TreeNode * deleteNode(Tree *tree, TreeNode *node) {
     if (prev == NULL) {
         return NULL;
     }
-    if ((prev->kid->data.name != NULL) && (!strcmp(prev->kid->data.name, node->data.name))) {
+    if ((prev->kid->data.name != NULL) &&
+        (!strcmp(prev->kid->data.name, node->data.name))) {
         prev->kid = node->sibling;
-    } else if ((prev->sibling->data.name != NULL) && (!strcmp(prev->sibling->data.name, node->data.name))) {
+    } else if ((prev->sibling->data.name != NULL) &&
+               (!strcmp(prev->sibling->data.name, node->data.name))) {
         prev->sibling = node->sibling;
     }
     free(node);
@@ -167,10 +168,11 @@ void printTree(Tree *tree) {
     printBranch(tree->root->kid, tree->root->data.name);
 }
 
-void printBranch(TreeNode *node, char *parentName){
+void printBranch(TreeNode *node, char *parentName) {
     if (node != NULL) {
         printBranch(node->kid, node->data.name);
         printBranch(node->sibling, parentName);
-        printf("%s (with path %s) in folder %s \n", node->data.name, node->data.path, parentName);
+        printf("%s (with path %s) in folder %s \n", node->data.name,
+               node->data.path, parentName);
     }
 }

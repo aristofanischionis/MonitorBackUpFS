@@ -16,8 +16,6 @@
 #include "monitoring.h"
 #include "tree.h"
 
-
-
 // Functions to watch the file system
 void fail(const char *message);
 void recursiveWatch(char *source, int fd, int *watched, WDmapping **map);

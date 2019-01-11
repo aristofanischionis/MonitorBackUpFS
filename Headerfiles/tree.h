@@ -1,9 +1,8 @@
 #ifndef TREE_HEADER
 #define TREE_HEADER
 
-#include "inode.h"
 #include "defines.h"
-
+#include "inode.h"
 
 typedef struct Data {
     char name[MAX];
@@ -11,7 +10,7 @@ typedef struct Data {
     INode *inode;
 } Data;
 
-typedef struct  TreeNode {
+typedef struct TreeNode {
     Data data;
     struct TreeNode *kid;
     struct TreeNode *sibling;
@@ -22,15 +21,15 @@ typedef struct Tree {
 } Tree;
 
 // functions
-Tree* initializeTree(Data data);
-TreeNode* newNode(Data data);
-TreeNode* addSiblingSorted(TreeNode *node, Data data);
-TreeNode* addKid(TreeNode* node, Data data);
-TreeNode* finderKids(TreeNode *toCheck, char *name);
-TreeNode * searchByPath(TreeNode *node, char *path);
-void deleteKids(TreeNode* node);
+Tree *initializeTree(Data data);
+TreeNode *newNode(Data data);
+TreeNode *addSiblingSorted(TreeNode *node, Data data);
+TreeNode *addKid(TreeNode *node, Data data);
+TreeNode *finderKids(TreeNode *toCheck, char *name);
+TreeNode *searchByPath(TreeNode *node, char *path);
+void deleteKids(TreeNode *node);
 TreeNode *findPrevious(TreeNode *node, Data data);
-TreeNode * deleteNode(Tree* root, TreeNode* node);
+TreeNode *deleteNode(Tree *root, TreeNode *node);
 void printTree(Tree *tree);
 void printBranch(TreeNode *node, char *parentName);
 

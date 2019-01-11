@@ -1,8 +1,8 @@
 #ifndef INODE_HEADER
 #define INODE_HEADER
 
-#include <time.h>
 #include <sys/types.h>
+#include <time.h>
 #include "namelist.h"
 
 typedef struct INode {
@@ -12,7 +12,7 @@ typedef struct INode {
     NameList *names;
     int nameCount;
     int modified;
-    struct INode *copy;    // only for files in source
+    struct INode *copy;  // only for files in source
     struct INode *next;
 } INode;
 

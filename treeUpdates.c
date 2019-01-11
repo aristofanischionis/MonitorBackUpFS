@@ -1,16 +1,16 @@
-#include <sys/inotify.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <limits.h>
-#include <libgen.h>
 #include "Headerfiles/treeUpdates.h"
+#include <dirent.h>
+#include <errno.h>
+#include <libgen.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/inotify.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 void updateTreeCreate(char *path, Tree **sourceTree, List *sourceList) {
     // make a copy of path to pass so that it doesn't change when passed to
@@ -34,23 +34,25 @@ void updateTreeCreate(char *path, Tree **sourceTree, List *sourceList) {
 
 void updateTreeDelete(char *path, Tree **sourceTree, List *sourceList) {
     // if a file will be deleted, unlink
-    // I can't call isDirectory because the real path doesn't exist in the source file
-    // so I check if the inode of tis tree node is null (directories don't have an inode)
+    // I can't call isDirectory because the real path doesn't exist in the
+    // source file so I check if the inode of tis tree node is null (directories
+    // don't have an inode)
     TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
     if (sourceNode != NULL && sourceNode->data.inode != NULL) {
         deleteINode(&sourceList, sourceNode->data.inode->inodeNum,
                     sourceNode->data.name);
         deleteNode(*sourceTree, sourceNode);
     }
-    
+
     return;
 }
 
-void updateTreeDeleteSelf(char *path, Tree **sourceTree, List *sourceList) {   
+void updateTreeDeleteSelf(char *path, Tree **sourceTree, List *sourceList) {
     // it concerns only a catalog
     printf("file delete\n");
-    // I can't call isDirectory because the real path doesn't exist in the source file
-    // so I check if the inode of tis tree node is null (directories don't have an inode)
+    // I can't call isDirectory because the real path doesn't exist in the
+    // source file so I check if the inode of tis tree node is null (directories
+    // don't have an inode)
     TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
     if (sourceNode != NULL && sourceNode->data.inode == NULL) {
         printf("dic delete\n");
@@ -71,8 +73,8 @@ void readDirectory(char *filename, List **list, TreeNode *previous) {
     } else {
         while ((direntp = readdir(file_ptr)) != NULL) {
             // remove '/' character if it exists at the end of the filename
-            if (filename[strlen(filename)-1] == '/') {
-                filename[strlen(filename)-1] = 0;
+            if (filename[strlen(filename) - 1] == '/') {
+                filename[strlen(filename) - 1] = 0;
             }
             sprintf(path, "%s/%s", filename, direntp->d_name);
             strcpy(data.name, direntp->d_name);

@@ -1,8 +1,8 @@
 #ifndef TREEUPDATES_HEADER
 #define TREEUPDATES_HEADER
 
-#include "list.h"
 #include "functions.h"
+#include "list.h"
 
 // Functions that update the trees depending on changes on the file system
 void updateTreeCreate(char *path, Tree **sourceTree, List *sourceList);

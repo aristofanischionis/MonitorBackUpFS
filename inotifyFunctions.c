@@ -9,7 +9,7 @@
 // Add files to be watched by inotify
 int inotifyCode(char *source, char *backup, List *sourceINodes,
                 List *backupINodes, Tree **sourceTree, Tree **backupTree) {
-        printf("filename %s\n", source);
+    printf("filename %s\n", source);
     int watched;
     int i;
     WDmapping *map;
@@ -25,14 +25,10 @@ int inotifyCode(char *source, char *backup, List *sourceINodes,
     // monitor root
 
     strcpy(map[watched].name, source);
-    map[watched].wd = inotify_add_watch(fd, source,
-                                        IN_CREATE | IN_MODIFY |
-
-                                            IN_ATTRIB | IN_CLOSE_WRITE |
-
-                                            IN_DELETE | IN_DELETE_SELF |
-
-                                            IN_MOVED_FROM | IN_MOVED_TO);
+    map[watched].wd = inotify_add_watch(
+        fd, source,
+        IN_CREATE | IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE | IN_DELETE |
+            IN_DELETE_SELF | IN_MOVED_FROM | IN_MOVED_TO);
 
     if (map[watched].wd == -1) {
         fprintf(stderr, "Cannot watch '%s'\n", source);
