@@ -20,7 +20,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
 void makeAction(struct inotify_event *event, int fd, char *path,
                 char *sourceBase, char *backup, List *sourceList,
                 List *backupList, int *watched, WDmapping **map, int wd,
-                char *eventPath, Tree **sourceTree);
+                char *eventPath, Tree **sourceTree, Tree **backupTree);
 const char *eventName(struct inotify_event *event);
 
 #endif

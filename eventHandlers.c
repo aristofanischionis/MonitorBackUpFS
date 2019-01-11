@@ -120,12 +120,8 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
 
             // call the function to handle the event
             makeAction(event, fd, source, (*sourceTree)->root->data.path, backup, sourceList, backupList,
-                        watched, map, wd, eventPath, sourceTree);
-
-            // Update logical structures
-            // updateSourceTree(event, eventPath, sourceTree, sourceList);
-            traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
-                          (*sourceTree)->root, (*backupTree)->root);
+                        watched, map, wd, eventPath, sourceTree, backupTree);
+            // print inodes and trees
             printStructures(*sourceTree, *backupTree, sourceList, backupList);
 
             // advance read_ptr to the beginning of the next event
@@ -169,7 +165,7 @@ const char *eventName(struct inotify_event *event) {
 void makeAction(struct inotify_event *event, int fd, char *path,
                 char *sourceBase, char *backup, List *sourceList,
                 List *backupList, int *watched, WDmapping **map, int wd,
-                char *eventPath, Tree **sourceTree) {
+                char *eventPath, Tree **sourceTree, Tree **backupTree) {
     if (event->mask & IN_ATTRIB) {
         printf("\nIN ATTRIB %s : \n", event->name);
         attribMode(event, path, sourceBase, backup, sourceList);
@@ -182,15 +178,21 @@ void makeAction(struct inotify_event *event, int fd, char *path,
         printf("\nCREATE %s : \n", event->name);
         createMode(event, fd, path, sourceBase, backup, sourceList, watched, map);
         updateTreeCreate(eventPath, sourceTree, sourceList);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
+                          (*sourceTree)->root, (*backupTree)->root);
     } 
     else if (event->mask & IN_DELETE) {
         printf("\nIN DELETE %s : \n", event->name);
         updateTreeDelete(eventPath, sourceTree, sourceList);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
+                          (*sourceTree)->root, (*backupTree)->root);
         deleteMode(event, path, sourceBase, backup);
     } 
     else if (event->mask & IN_DELETE_SELF) {
         printf("\nIN DELETE SELF %s : \n", event->name);
         updateTreeDeleteSelf(eventPath, sourceTree, sourceList);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList, &backupList,
+                          (*sourceTree)->root, (*backupTree)->root);
         deleteSelfMode(event, fd, wd, path, sourceBase, backup);
     } 
     else if (event->mask & IN_MODIFY) {
