@@ -49,6 +49,7 @@ TreeNode* addSiblingSorted(TreeNode *node, Data data) {
 // Add a kid to the given node
 TreeNode* addKid(TreeNode *node, Data data) {
     if (node == NULL) {
+        printf("addKid: Node is null\n");
         return NULL;
     }
     // if there is already a kid, add it as a sibling to it
@@ -70,7 +71,7 @@ TreeNode* addKid(TreeNode *node, Data data) {
 }
 
 TreeNode * searchByPath(TreeNode *node, char *path) {
-    if(node == NULL || strcmp(path, "")){
+    if(node == NULL || !strcmp(path, "")){
         return NULL;
     } 
     if(!strcmp(node->data.path, path)){

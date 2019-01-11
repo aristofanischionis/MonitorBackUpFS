@@ -33,6 +33,7 @@ int main(int argc, char const *argv[]) {
     if (backupFileCopy[strlen(backupFileCopy)-1] == '/') {
         backupFileCopy[strlen(backupFileCopy)-1] = 0;
     }
+    printf("source file %s\n", sourceFileCopy);
     strcpy(sourceData.name, sourceFileCopy);
     strcpy(backupData.name, backupFileCopy);
     strcpy(sourceData.path, sourceFileCopy);

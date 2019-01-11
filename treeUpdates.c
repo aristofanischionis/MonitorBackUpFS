@@ -17,8 +17,7 @@ void updateTreeCreate(char *path, Tree **sourceTree, List *sourceList) {
     // functions
     char *pathCopy = malloc(strlen(path) + 1);
     strcpy(pathCopy, path);
-    TreeNode *previous =
-        searchByPath((*sourceTree)->root, dirname(pathCopy));
+    TreeNode *previous = searchByPath((*sourceTree)->root, dirname(pathCopy));
     strcpy(pathCopy, path);
     Data data;
     strcpy(data.path, path);
@@ -26,11 +25,9 @@ void updateTreeCreate(char *path, Tree **sourceTree, List *sourceList) {
     data.inode = NULL;
     // if a file was added, add an inode
     if (!isDirectory(path)) {
-        printf("file created\n");
         INode *node = addINode(&sourceList, path);
         data.inode = node;
     }
-    printf("dir created\n");
     addKid(previous, data);
     return;
 }

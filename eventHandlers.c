@@ -88,7 +88,13 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
                 }
             }
 
-            char *source = (*map)[j].name;
+            char source[MAX];
+            strcpy(source, (*map)[j].name);
+            // remove '/' character if it exists at the end of the source path
+            // (strlen(eventPath)-2] because of end of text character)
+            if (source[strlen(source)-1] == '/') {
+                source[strlen(source)-1] = 0;
+            }
             char eventPath[MAX];
             sprintf(eventPath, "%s/%s", source, event->name);
             // remove '/' character if it exists at the end of the eventPath
@@ -96,7 +102,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             if (eventPath[strlen(eventPath)-2] == '/') {
                 eventPath[strlen(eventPath)-2] = 0;
             }
-            printf("event path in handleEvents: %s\n", eventPath);
+            printf("event path in handleEvents: %s, source: %s\n", eventPath, source);
 
             // check for moved case
 

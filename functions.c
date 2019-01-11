@@ -122,6 +122,11 @@ char *formatBackupPath(char *sourceBase, char *backupBase, char *sourcePath) {
         }
     }
     strcat(backupPath, sourcePathCopy);
+    // remove '/' character if it exists at the end of the source path
+    // (strlen(eventPath)-2] because of end of text character)
+    if (backupPath[strlen(backupPath)-1] == '/') {
+        backupPath[strlen(backupPath)-1] = 0;
+    }
     return backupPath;
 }
 
