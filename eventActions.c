@@ -103,7 +103,6 @@ void modifyMode(struct inotify_event* event, char* path, char* sourceBase,
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
     
     sprintf(bPath, "%s/%s", bPath, event->name);
@@ -129,7 +128,6 @@ void closeWriteMode(struct inotify_event* event, char* path, char* sourceBase,
     char buf1[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
 
     sprintf(bPath, "%s/%s", bPath, event->name);

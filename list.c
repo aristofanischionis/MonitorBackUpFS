@@ -51,16 +51,6 @@ INode *addINode(List **list, char *path) {
     return (*list)->head;
 }
 
-// Make a source node point to its copy
-int pointToCopy(List *list, INode *inode, int inodeNumCopy) {
-    INode *copy = searchForINode(list, inodeNumCopy);
-    if (copy == NULL) {
-        return 1;
-    }
-    inode->copy = copy;
-    return 0;
-}
-
 // Find if an inode exists and return it else return null
 INode *searchForINode(List *list, int inodeNum) {
     // if list is empty return null

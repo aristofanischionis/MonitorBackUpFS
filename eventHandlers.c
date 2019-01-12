@@ -201,6 +201,9 @@ void makeAction(struct inotify_event *event, int fd, char *path,
         deleteSelfMode(event, fd, wd, path, sourceBase, backup);
     } else if (event->mask & IN_MODIFY) {
         printf("\nIN MODIFY %s : \n", event->name);
+        updateTreeModify(eventPath, sourceTree, sourceList);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
+                      &backupList, (*sourceTree)->root, (*backupTree)->root);
         modifyMode(event, path, sourceBase, backup, backupList);
     } else if (event->mask & IN_MOVED_FROM) {
         printf("\nIN MOVE FROM %s : \n", event->name);

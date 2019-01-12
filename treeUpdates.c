@@ -60,6 +60,16 @@ void updateTreeDeleteSelf(char *path, Tree **sourceTree, List *sourceList) {
     return;
 }
 
+void updateTreeModify(char *path, Tree **sourceTree, List *sourceList) {
+    TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
+    struct stat buf;
+    if (stat(path, &buf) == -1) {
+        perror("Error using stat");
+        return;
+    }
+    sourceNode->data.inode->modDate = buf.st_ctime;
+}
+
 void readDirectory(char *filename, List **list, TreeNode *previous) {
     DIR *file_ptr;
     Data data;
