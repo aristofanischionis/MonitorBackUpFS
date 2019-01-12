@@ -16,7 +16,6 @@ void createMode(struct inotify_event* event, int fd, char* path,
     INode* inode;
     char* backupTo;
     backupTo = malloc(MAX * sizeof(char));
-    // backupTo = backupPath(path, backup);
     backupTo = formatBackupPath(sourceBase, backup, path);
     if (event->mask & IN_ISDIR) {
         makeDirectory(backupTo, event->name);
@@ -63,7 +62,6 @@ void attribMode(struct inotify_event* event, char* path, char* sourceBase,
     char* bPath;
     sprintf(fullPath, "%s/%s", realpath(path, buf), event->name);
     bPath = malloc(MAX * sizeof(char));
-    // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
     sprintf(bPath, "%s/%s", bPath, event->name);
     //
@@ -107,8 +105,8 @@ void modifyMode(struct inotify_event* event, char* path, char* sourceBase,
     bPath = malloc(MAX * sizeof(char));
     // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
-    //
-    sprintf(bPath, "%s%s", bPath, event->name);
+    
+    sprintf(bPath, "%s/%s", bPath, event->name);
     if (!(event->mask & IN_ISDIR)) {
         // if it is a file
         inode = searchForINodeByPath(backupList, bPath);
@@ -138,7 +136,6 @@ void closeWriteMode(struct inotify_event* event, char* path, char* sourceBase,
     sprintf(fullPath, "%s/%s", realpath(path, buf), event->name);
     if (!(event->mask & IN_ISDIR)) {
         // if it is a file
-        printf("bpath is %s\n", bPath);
         inode = searchForINodeByPath(backupList, bPath);
         if (inode == NULL) {
             perror("inode is null\n");
@@ -165,7 +162,6 @@ void deleteMode(struct inotify_event* event, char* path, char* sourceBase,
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
 
     sprintf(bPath, "%s/%s", bPath, event->name);
@@ -183,7 +179,6 @@ void deleteSelfMode(struct inotify_event* event, int fd, int wd, char* path,
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
 
     sprintf(bPath, "%s/", realpath(bPath, buf));
@@ -205,10 +200,8 @@ void movedFromMode(struct inotify_event* event, char* path, char* sourceBase,
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
-
-    sprintf(bPath, "%s/", realpath(bPath, buf));
+    sprintf(bPath, "%s", realpath(bPath, buf));
     sprintf(bPath, "%s/%s", bPath, event->name);
     cookieValue1 = event->cookie;
     strcpy(movedName, bPath);
@@ -222,10 +215,8 @@ void movedToMode(struct inotify_event* event, int fd, char* path,
     char buf[MAX];
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
-    // bPath = backupPath(path, backup);
     bPath = formatBackupPath(sourceBase, backup, path);
-
-    sprintf(bPath, "%s/", realpath(bPath, buf));
+    sprintf(bPath, "%s", realpath(bPath, buf));
     sprintf(bPath, "%s/%s", bPath, event->name);
 
     if (cookieValue1 == event->cookie) {

@@ -56,7 +56,7 @@ int main(int argc, char const *argv[]) {
     traverseTrees(sourceTree->root->data.path, backupTree, &sourceINodes,
                   &backupINodes, sourceTree->root, backupTree->root);
     printStructures(sourceTree, backupTree, sourceINodes, backupINodes);
-    inotifyCode(sourceFilename, backupFilename, sourceINodes, backupINodes,
+    inotifyCode(sourceFileCopy, backupFilename, sourceINodes, backupINodes,
                 &sourceTree, &backupTree);
 
     // Free allocated memory

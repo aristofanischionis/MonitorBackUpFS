@@ -95,11 +95,17 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             if (source[strlen(source) - 1] == '/') {
                 source[strlen(source) - 1] = 0;
             }
+            else if (source[strlen(source) - 2] == '/') {
+                source[strlen(source) - 2] = 0;
+            }
             char eventPath[MAX];
             sprintf(eventPath, "%s/%s", source, event->name);
             // remove '/' character if it exists at the end of the eventPath
             // (strlen(eventPath)-2] because of end of text character)
-            if (eventPath[strlen(eventPath) - 2] == '/') {
+            if (eventPath[strlen(eventPath) - 1] == '/') {
+                eventPath[strlen(eventPath) - 1] = 0;
+            }
+            else if (eventPath[strlen(eventPath) - 2] == '/') {
                 eventPath[strlen(eventPath) - 2] = 0;
             }
             printf("event path in handleEvents: %s, source: %s\n", eventPath,
@@ -197,7 +203,7 @@ void makeAction(struct inotify_event *event, int fd, char *path,
         printf("\nIN MODIFY %s : \n", event->name);
         modifyMode(event, path, sourceBase, backup, backupList);
     } else if (event->mask & IN_MOVED_FROM) {
-        printf("\nIN MOVE IN %s : \n", event->name);
+        printf("\nIN MOVE FROM %s : \n", event->name);
         movedFromMode(event, path, sourceBase, backup);
     } else if (event->mask & IN_MOVED_TO) {
         printf("\nIN MOVE OUT %s : \n", event->name);

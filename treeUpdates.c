@@ -49,13 +49,11 @@ void updateTreeDelete(char *path, Tree **sourceTree, List *sourceList) {
 
 void updateTreeDeleteSelf(char *path, Tree **sourceTree, List *sourceList) {
     // it concerns only a catalog
-    printf("file delete\n");
     // I can't call isDirectory because the real path doesn't exist in the
     // source file so I check if the inode of tis tree node is null (directories
     // don't have an inode)
     TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
     if (sourceNode != NULL && sourceNode->data.inode == NULL) {
-        printf("dic delete\n");
         TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
         deleteNode(*sourceTree, nodeFound);
     }
