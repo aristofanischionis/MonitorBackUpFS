@@ -14,6 +14,8 @@
 volatile sig_atomic_t running;
 int cookieValue1 = 0;
 char movedName[MAX];
+// An inode pointer to keep the inode when a file is moved
+INode *inodeForMove;
 
 void handle_sigint(int sig) {
     signal(SIGINT, handle_sigint);
@@ -111,13 +113,22 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             printf("event path in handleEvents: %s, source: %s\n", eventPath,
                    source);
 
-            // check for moved case
+            // if the event is a move from, keep the inode
+            if (event->mask & IN_MOVED_FROM) {
+                inodeForMove = searchForINodeByPath(sourceList, eventPath);
+            }
 
+            // check for moved case
             if (cookieValue1 != 0) {
-                // check for moved case
                 if (event->mask & IN_MOVED_TO) {
                     // just go to use Function
-                } else {
+                }
+                // if the file was moved to an externar folder 
+                else {
+                    deleteINode(&sourceList, inodeForMove->inodeNum, movedName);
+                    traverseTrees((*sourceTree)->root->data.path, *backupTree,
+                                  &sourceList, &backupList, (*sourceTree)->root,
+                                  (*backupTree)->root);
                     if (unlink(movedName) == 0) {
                         // clear the movedName
                         memset(movedName, 0, sizeof(movedName));
@@ -175,44 +186,71 @@ void makeAction(struct inotify_event *event, int fd, char *path,
                 List *backupList, int *watched, WDmapping **map, int wd,
                 char *eventPath, Tree **sourceTree, Tree **backupTree) {
     if (event->mask & IN_ATTRIB) {
-        printf("\nIN ATTRIB %s : \n", event->name);
+        printf("\nATTRIB %s : \n", event->name);
+        updateTreeModify(eventPath, sourceTree, sourceList);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
+                      &backupList, (*sourceTree)->root, (*backupTree)->root);
         attribMode(event, path, sourceBase, backup, sourceList);
-    } else if (event->mask & IN_CLOSE_WRITE) {
-        printf("\nIN CLOSE WRITE %s\n", event->name);
+    } 
+    else if (event->mask & IN_CLOSE_WRITE) {
+        printf("\nCLOSE WRITE %s\n", event->name);
         closeWriteMode(event, path, sourceBase, backup, backupList);
-    } else if (event->mask & IN_CREATE) {
+    } 
+    else if (event->mask & IN_CREATE) {
         printf("\nCREATE %s : \n", event->name);
         createMode(event, fd, path, sourceBase, backup, sourceList, watched,
                    map);
         updateTreeCreate(eventPath, sourceTree, sourceList);
         traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
                       &backupList, (*sourceTree)->root, (*backupTree)->root);
-    } else if (event->mask & IN_DELETE) {
-        printf("\nIN DELETE %s : \n", event->name);
+    } 
+    else if (event->mask & IN_DELETE) {
+        printf("\nDELETE %s : \n", event->name);
         updateTreeDelete(eventPath, sourceTree, sourceList);
         traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
                       &backupList, (*sourceTree)->root, (*backupTree)->root);
         deleteMode(event, path, sourceBase, backup);
-    } else if (event->mask & IN_DELETE_SELF) {
-        printf("\nIN DELETE SELF %s : \n", event->name);
+    } 
+    else if (event->mask & IN_DELETE_SELF) {
+        printf("\nDELETE SELF %s : \n", event->name);
         updateTreeDeleteSelf(eventPath, sourceTree, sourceList);
         traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
                       &backupList, (*sourceTree)->root, (*backupTree)->root);
         deleteSelfMode(event, fd, wd, path, sourceBase, backup);
-    } else if (event->mask & IN_MODIFY) {
-        printf("\nIN MODIFY %s : \n", event->name);
+    } 
+    else if (event->mask & IN_MODIFY) {
+        printf("\nMODIFY %s : \n", event->name);
         updateTreeModify(eventPath, sourceTree, sourceList);
         traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
                       &backupList, (*sourceTree)->root, (*backupTree)->root);
         modifyMode(event, path, sourceBase, backup, backupList);
-    } else if (event->mask & IN_MOVED_FROM) {
-        printf("\nIN MOVE FROM %s : \n", event->name);
+    } 
+    else if (event->mask & IN_MOVED_FROM) {
+        printf("\nMOVE FROM %s : \n", event->name);
+        updateTreeMoveFrom(eventPath, sourceTree, sourceList);
+        traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
+                      &backupList, (*sourceTree)->root, (*backupTree)->root);
         movedFromMode(event, path, sourceBase, backup);
-    } else if (event->mask & IN_MOVED_TO) {
-        printf("\nIN MOVE OUT %s : \n", event->name);
-        movedToMode(event, fd, path, sourceBase, backup, sourceList, watched,
+    } 
+    else if (event->mask & IN_MOVED_TO) {
+        printf("\nMOVE TO %s : \n", event->name);
+        int flag = movedToMode(event, fd, path, sourceBase, backup, sourceList, watched,
                     map);
-    } else {
+        // if a file from the same hierarchy was moved
+        if (flag == 1) {
+            updateTreeMoveToInsideHierarchy(eventPath, sourceTree, sourceList, inodeForMove);
+            traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
+                      &backupList, (*sourceTree)->root, (*backupTree)->root);
+        }
+        // if a file from an external (to the hierarchy) folder was moved
+        else {
+            updateTreeCreate(eventPath, sourceTree, sourceList);
+            traverseTrees((*sourceTree)->root->data.path, *backupTree,
+                          &sourceList, &backupList, (*sourceTree)->root,
+                          (*backupTree)->root);
+        }
+    } 
+    else {
         return;
     }
 }

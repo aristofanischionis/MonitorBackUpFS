@@ -33,15 +33,15 @@ void updateTreeCreate(char *path, Tree **sourceTree, List *sourceList) {
 }
 
 void updateTreeDelete(char *path, Tree **sourceTree, List *sourceList) {
-    // if a file will be deleted, unlink
+    // if a file will be deleted, unlink it
     // I can't call isDirectory because the real path doesn't exist in the
     // source file so I check if the inode of tis tree node is null (directories
     // don't have an inode)
-    TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
-    if (sourceNode != NULL && sourceNode->data.inode != NULL) {
-        deleteINode(&sourceList, sourceNode->data.inode->inodeNum,
-                    sourceNode->data.name);
-        deleteNode(*sourceTree, sourceNode);
+    TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
+    if (nodeFound != NULL && nodeFound->data.inode != NULL) {
+        deleteINode(&sourceList, nodeFound->data.inode->inodeNum,
+                    nodeFound->data.name);
+        deleteNode(*sourceTree, nodeFound);
     }
 
     return;
@@ -50,24 +50,44 @@ void updateTreeDelete(char *path, Tree **sourceTree, List *sourceList) {
 void updateTreeDeleteSelf(char *path, Tree **sourceTree, List *sourceList) {
     // it concerns only a catalog
     // I can't call isDirectory because the real path doesn't exist in the
-    // source file so I check if the inode of tis tree node is null (directories
+    // source file, so I check if the inode of this tree node is null (directories
     // don't have an inode)
-    TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
-    if (sourceNode != NULL && sourceNode->data.inode == NULL) {
-        TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
+    TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
+    if (nodeFound != NULL && nodeFound->data.inode == NULL) {
         deleteNode(*sourceTree, nodeFound);
     }
     return;
 }
 
 void updateTreeModify(char *path, Tree **sourceTree, List *sourceList) {
-    TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
+    TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
     struct stat buf;
     if (stat(path, &buf) == -1) {
         perror("Error using stat");
         return;
     }
-    sourceNode->data.inode->modDate = buf.st_ctime;
+    nodeFound->data.inode->modDate = buf.st_ctime;
+}
+
+void updateTreeMoveToInsideHierarchy(char *path, Tree **sourceTree,
+                                     List *sourceList, INode *inode) {
+    // make a copy of path to pass so that it doesn't change when passed to
+    // functions
+    char *pathCopy = malloc(strlen(path) + 1);
+    strcpy(pathCopy, path);
+    TreeNode *previous = searchByPath((*sourceTree)->root, dirname(pathCopy));
+    strcpy(pathCopy, path);
+    Data data;
+    strcpy(data.path, path);
+    strcpy(data.name, basename(pathCopy));
+    data.inode = inode;
+    addKid(previous, data);
+    return;
+}
+
+void updateTreeMoveFrom(char *path, Tree **sourceTree, List *sourceList) {
+    TreeNode *sourceNode = searchByPath((*sourceTree)->root, path);
+    deleteNode(*sourceTree, sourceNode);
 }
 
 void readDirectory(char *filename, List **list, TreeNode *previous) {

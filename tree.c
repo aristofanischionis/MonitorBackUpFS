@@ -172,7 +172,6 @@ void printBranch(TreeNode *node, char *parentName) {
     if (node != NULL) {
         printBranch(node->kid, node->data.name);
         printBranch(node->sibling, parentName);
-        printf("%s (with path %s) in folder %s \n", node->data.name,
-               node->data.path, parentName);
+        printf("%s in folder %s \n", node->data.name, parentName);
     }
 }

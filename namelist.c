@@ -51,7 +51,7 @@ void printNames(NameList *list) {
     NameListNode *current = list->head;
 
     while (current != NULL) {
-        printf("%s\n", current->name);
+        printf("%s  \n", current->name);
         current = current->next;
     }
 }

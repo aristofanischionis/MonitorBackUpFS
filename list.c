@@ -33,7 +33,7 @@ INode *addINode(List **list, char *path) {
         // increase counter
         addName(&node->names, filename);
         node->nameCount++;
-        return NULL;
+        return node;
     }
 
     INode *newNode = (INode *)malloc(sizeof(INode));
@@ -84,7 +84,7 @@ void printINodes(List *list) {
     INode *current = list->head;
 
     while (current != NULL) {
-        printf("%d %ld %s with names\t", current->inodeNum, current->size,
+        printf("%d %ld %s \twith names:  ", current->inodeNum, current->size,
                ctime(&current->modDate));
         printNames(current->names);
         current = current->next;
@@ -100,7 +100,7 @@ int deleteINode(List **list, int inodeNum, char *name) {
         return 1;
     }
 
-    // if node has more that one name in ts lists, delete only the name from the
+    // if node has more that one name in its namelist, delete only the name from the
     // list
     if (node->names->head->next != NULL) {
         deleteName(&node->names, name);

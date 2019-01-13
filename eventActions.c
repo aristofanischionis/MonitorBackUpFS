@@ -8,7 +8,6 @@
 
 extern int cookieValue1;
 extern char movedName[MAX];
-;
 
 void createMode(struct inotify_event* event, int fd, char* path,
                 char* sourceBase, char* backup, List* sourceList, int* watched,
@@ -207,11 +206,13 @@ void movedFromMode(struct inotify_event* event, char* path, char* sourceBase,
 }
 
 // file moved inside the watched dir
-void movedToMode(struct inotify_event* event, int fd, char* path,
+int movedToMode(struct inotify_event* event, int fd, char* path,
                  char* sourceBase, char* backup, List* sourceList, int* watched,
                  WDmapping** map) {
     char buf[MAX];
     char* bPath;
+    // flag will be returned and it shows if a file was moved from an exterior folder or not
+    int flag = 0;
     bPath = malloc(MAX * sizeof(char));
     bPath = formatBackupPath(sourceBase, backup, path);
     sprintf(bPath, "%s", realpath(bPath, buf));
@@ -223,10 +224,12 @@ void movedToMode(struct inotify_event* event, int fd, char* path,
         rename(movedName, bPath);
         // copy(movedName, bPath);
         // delete the movedname afterwards we don't need it there
+        flag = 1;
     } else {
         createMode(event, fd, path, sourceBase, backup, sourceList, watched,
                    map);
         copy(movedName, bPath);
+        flag = 2;
     }
     cookieValue1 = 0;
     // clear the movedName

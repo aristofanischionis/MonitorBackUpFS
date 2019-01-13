@@ -21,7 +21,7 @@ void deleteMode(struct inotify_event* event, char* path, char* sourceBase,
                 char* backup);
 void movedFromMode(struct inotify_event* event, char* path, char* sourceBase,
                    char* backup);
-void movedToMode(struct inotify_event* event, int fd, char* path,
+int movedToMode(struct inotify_event* event, int fd, char* path,
                  char* sourceBase, char* backup, List* sourceList, int* watched,
                  WDmapping** map);
 
