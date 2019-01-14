@@ -131,6 +131,7 @@ void closeWriteMode(struct inotify_event* event, char* path, char* sourceBase,
 
     sprintf(bPath, "%s/%s", bPath, event->name);
     sprintf(fullPath, "%s/%s", realpath(path, buf), event->name);
+    printf("path is %s\n", bPath);
     if (!(event->mask & IN_ISDIR)) {
         // if it is a file
         inode = searchForINodeByPath(backupList, bPath);
