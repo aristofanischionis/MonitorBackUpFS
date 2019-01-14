@@ -124,9 +124,7 @@ void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
 
 // Returns different integers depending on which case the branches are
 int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
-    printf("%s      %s       ", sourceNode->data.name, backupNode->data.name);
     if (sourceNode == NULL && backupNode == NULL) {
-        printf("is null\n");
         return 0;
     }
     // if there is a node (directory/file) in source (at the end of the list of
@@ -134,10 +132,8 @@ int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
     else if (backupNode == NULL) {
         // check if missing node is a file or a directory
         if (!isDirectory(sourceNode->data.path)) {  // if it is a file
-            printf("file in source\n");
             return FILE_IN_SOURCE;
         } else {  // if it is a directory
-            printf("dir in source\n");
             return DIR_IN_SOURCE;
         }
     }
@@ -146,49 +142,31 @@ int returnCase(TreeNode *sourceNode, TreeNode *backupNode) {
     else if (sourceNode == NULL) {
         // check if missing node is a file or a directory
         if (!isDirectory(backupNode->data.path)) {  // if it is a file
-            printf("file in backup\n");
             return FILE_IN_BACKUP;
         } else {  // if it is a directory
-            printf("dir in backup\n");
             return DIR_IN_BACKUP;
         }
     }
     // if there is a node in both
     else {
-        // check if this node has the same name
         int strCompare = strcmp(sourceNode->data.name, backupNode->data.name);
-        // check if both are files
-        if (!isDirectory(sourceNode->data.path) &&
-            !isDirectory(backupNode->data.path)) {
-            // the file is in both trees
-            if (strCompare == 0) {
-                printf("file in both\n");
+        if (strCompare == 0) {
+            if (!isDirectory(sourceNode->data.path) &&
+                !isDirectory(backupNode->data.path)) {
                 return FILE_IN_BOTH;
-            }
-            // the file is in backup
-            else if (strCompare > 0) {
-                printf("file in backup\n");
-                return FILE_IN_BACKUP;
-            }
-            // the file is in source
-            else if (strCompare < 0) {
-                printf("file in source\n");
-                return FILE_IN_SOURCE;
-            }
-        } else {
-            // the directory is in both trees
-            if (strCompare == 0) {
-                printf("dir in both\n");
+            } else {
                 return DIR_IN_BOTH;
             }
-            // the file is in backup
-            else if (strCompare > 0) {
-                printf("dir in backup\n");
+        } else if (strCompare > 0) {
+            if (!isDirectory(backupNode->data.path)) {
+                return FILE_IN_BACKUP;
+            } else {
                 return DIR_IN_BACKUP;
             }
-            // the file is in source
-            else if (strCompare < 0) {
-                printf("dir in source\n");
+        } else if (strCompare < 0) {
+            if (!isDirectory(sourceNode->data.path)) {
+                return FILE_IN_SOURCE;
+            } else {
                 return DIR_IN_SOURCE;
             }
         }
