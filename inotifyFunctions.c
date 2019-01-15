@@ -9,7 +9,6 @@
 // Add files to be watched by inotify
 int inotifyCode(char *source, char *backup, List *sourceINodes,
                 List *backupINodes, Tree **sourceTree, Tree **backupTree) {
-    printf("filename %s\n", source);
     int watched;
     int i;
     WDmapping *map;

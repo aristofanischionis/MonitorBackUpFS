@@ -110,8 +110,6 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             else if (eventPath[strlen(eventPath) - 2] == '/') {
                 eventPath[strlen(eventPath) - 2] = 0;
             }
-            printf("event path in handleEvents: %s, source: %s\n", eventPath,
-                   source);
 
             // if the event is a move from, keep the inode
             if (event->mask & IN_MOVED_FROM) {
