@@ -104,6 +104,8 @@ int deleteINode(List **list, int inodeNum, char *name) {
     // list
     if (node->names->head->next != NULL) {
         deleteName(&node->names, name);
+        node->nameCount--;
+        
         return 2;
     }
 
