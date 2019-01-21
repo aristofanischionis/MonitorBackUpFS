@@ -126,7 +126,6 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
                 }
                 // if the file was moved to an externar folder 
                 else {
-                    inodeForMove = searchForINodeByPath(sourceList, eventPath);
                     deleteINode(&sourceList, inodeForMove->inodeNum, previousEventName);
                     traverseTrees((*sourceTree)->root->data.path, *backupTree,
                                   &sourceList, &backupList, (*sourceTree)->root,

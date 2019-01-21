@@ -82,16 +82,14 @@ void attribMode(struct inotify_event* event, char* path, char* sourceBase,
         if (!inode->modDate) {
             perror("inode mod data is null\n");
         }
-        double seconds = difftime(statbuf.st_ctime, inode->modDate);
-        if (seconds > 0) {
-            // update the replica
-            // update the moddate
-            inode->modDate = statbuf.st_ctime;
-            // rm old file from backup
-            remove(bPath);
-            // cp file from source to backup
-            copy(fullPath, bPath);
-        }
+        // update the replica
+        // update the moddate
+        inode->modDate = statbuf.st_ctime;
+        // // rm old file from backup
+        // remove(bPath);
+        // cp file from source to backup
+        // printf("i am attrib: %s, %s \n", fullPath, bPath);
+        copy(fullPath, bPath);
     }
     free(bPath);
 }

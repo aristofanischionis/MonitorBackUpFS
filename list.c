@@ -97,6 +97,7 @@ int deleteINode(List **list, int inodeNum, char *name) {
     INode *node = searchForINode(*list, inodeNum);
     // check if given node exists
     if (node == NULL) {
+        printf("Node does not exist\n");
         return 1;
     }
 
