@@ -114,6 +114,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
             // if the event is a move from, keep the inode
             if (event->mask & IN_MOVED_FROM) {
                 inodeForMove = searchForINodeByPath(sourceList, eventPath);
+                
             }
 
             // check for moved case

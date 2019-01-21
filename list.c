@@ -20,7 +20,7 @@ List *initializeList(void) {
 INode *addINode(List **list, char *path) {
     struct stat buf;
     if (stat(path, &buf) == -1) {
-        perror("Error using stat");
+        perror("Error using stat in addINode");
         return NULL;
     }
     // extract filename from path
@@ -72,7 +72,7 @@ INode *searchForINode(List *list, int inodeNum) {
 INode *searchForINodeByPath(List *list, char *path) {
     struct stat buf;
     if (stat(path, &buf) == -1) {
-        perror("Error using stat");
+        perror("Error using stat in searchForINode");
         return NULL;
     }
     int inodeNum = (int)buf.st_ino;

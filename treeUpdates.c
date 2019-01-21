@@ -63,7 +63,7 @@ void updateTreeModify(char *path, Tree **sourceTree, List *sourceList) {
     TreeNode *nodeFound = searchByPath((*sourceTree)->root, path);
     struct stat buf;
     if (stat(path, &buf) == -1) {
-        perror("Error using stat");
+        perror("Error using stat in modify:");
         return;
     }
     nodeFound->data.inode->modDate = buf.st_ctime;
@@ -79,6 +79,7 @@ void updateTreeMoveToInsideHierarchy(char *path, Tree **sourceTree,
     strcpy(pathCopy, path);
     Data data;
     strcpy(data.path, path);
+    printf("path in node %s\n", path);
     strcpy(data.name, basename(pathCopy));
     data.inode = inode;
     addKid(previous, data);

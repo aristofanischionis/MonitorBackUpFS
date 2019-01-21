@@ -2,6 +2,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/wait.h> 
 #include "Headerfiles/functions.h"
 #include "Headerfiles/inode.h"
 #include "Headerfiles/inotifyFunctions.h"
@@ -74,8 +75,7 @@ void attribMode(struct inotify_event* event, char* path, char* sourceBase,
         inode = searchForINodeByPath(sourceList, fullPath);
         if (inode == NULL) {
             perror(
-                "make sure that you have called add inode after file "
-                "creation\n");
+                "make sure that you have called add inode after file creation\n");
             // exit(1);
         }
         if (!inode->modDate) {
@@ -103,7 +103,6 @@ void modifyMode(struct inotify_event* event, char* path, char* sourceBase,
     char* bPath;
     bPath = malloc(MAX * sizeof(char));
     bPath = formatBackupPath(sourceBase, backup, path);
-    
     sprintf(bPath, "%s/%s", bPath, event->name);
     if (!(event->mask & IN_ISDIR)) {
         // if it is a file
@@ -176,6 +175,7 @@ void deleteSelfMode(struct inotify_event* event, int fd, int wd, char* path,
                     char* sourceBase, char* backup) {
     char buf[MAX];
     char* bPath;
+    pid_t pid;
     bPath = malloc(MAX * sizeof(char));
     bPath = formatBackupPath(sourceBase, backup, path);
 
@@ -183,7 +183,23 @@ void deleteSelfMode(struct inotify_event* event, int fd, int wd, char* path,
 
     // if it is a dir
     // remove it from backup
-    rmdir(bPath);
+    if ((pid = fork()) == -1) {
+        perror(" fork ");
+        exit(EXIT_FAILURE);
+    }
+    if (pid == 0) {
+        // child
+        char *params[4];
+        params[0] = "rm";
+        params[1] = "-rf";
+        params[2] = malloc(MAX * sizeof(char));
+        strcpy(params[2], bPath);
+        params[3] = NULL;
+        execvp("rm", params);
+    } else {
+        wait(NULL);
+    }
+    // rmdir(bPath);
 
     inotify_rm_watch(fd, wd);
 }
