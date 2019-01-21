@@ -14,7 +14,6 @@
 volatile sig_atomic_t running;
 int cookieValue1 = 0;
 char movedName[MAX];
-// An inode pointer to keep the inode when a file is moved
 INode *inodeForMove;
 
 void handle_sigint(int sig) {
@@ -43,6 +42,8 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
     /* Loop while events can be read from inotify file descriptor. */
 
     read_offset = 0;  // remaining number of bytes from previous read
+    char previousEventName[MAX];
+
     while (running) {
         /* read next series of events */
         length = read(fd, buffer + read_offset, sizeof(buffer) - read_offset);
@@ -113,18 +114,20 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
 
             // if the event is a move from, keep the inode
             if (event->mask & IN_MOVED_FROM) {
-                inodeForMove = searchForINodeByPath(sourceList, eventPath);
-                
+                strcpy(previousEventName, event->name);
+                inodeForMove = searchByPath((*sourceTree)->root, eventPath)->data.inode;
             }
 
             // check for moved case
             if (cookieValue1 != 0) {
                 if (event->mask & IN_MOVED_TO) {
                     // just go to use Function
+                    deleteName(&(inodeForMove->names), previousEventName);
                 }
                 // if the file was moved to an externar folder 
                 else {
-                    deleteINode(&sourceList, inodeForMove->inodeNum, movedName);
+                    inodeForMove = searchForINodeByPath(sourceList, eventPath);
+                    deleteINode(&sourceList, inodeForMove->inodeNum, previousEventName);
                     traverseTrees((*sourceTree)->root->data.path, *backupTree,
                                   &sourceList, &backupList, (*sourceTree)->root,
                                   (*backupTree)->root);
@@ -235,6 +238,7 @@ void makeAction(struct inotify_event *event, int fd, char *path,
         printf("\nMOVE TO %s : \n", event->name);
         int flag = movedToMode(event, fd, path, sourceBase, backup, sourceList, watched,
                     map);
+        printf("flag isssssssssssssssss %d\n", flag);
         // if a file from the same hierarchy was moved
         if (flag == 1) {
             updateTreeMoveToInsideHierarchy(eventPath, sourceTree, sourceList, inodeForMove);

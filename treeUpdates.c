@@ -79,9 +79,9 @@ void updateTreeMoveToInsideHierarchy(char *path, Tree **sourceTree,
     strcpy(pathCopy, path);
     Data data;
     strcpy(data.path, path);
-    printf("path in node %s\n", path);
     strcpy(data.name, basename(pathCopy));
     data.inode = inode;
+    addName(&(data.inode->names), data.name);
     addKid(previous, data);
     return;
 }

@@ -236,10 +236,8 @@ int movedToMode(struct inotify_event* event, int fd, char* path,
     sprintf(bPath, "%s/%s", bPath, event->name);
 
     if (cookieValue1 == event->cookie) {
-        // it is the same hierarchy
-        // must move name to the correct folder
+        // it is in the same hierarchy
         rename(movedName, bPath);
-        // copy(movedName, bPath);
         // delete the movedname afterwards we don't need it there
         flag = 1;
     } else {
@@ -252,4 +250,5 @@ int movedToMode(struct inotify_event* event, int fd, char* path,
     // clear the movedName
     memset(movedName, 0, sizeof(movedName));
     free(bPath);
+    return flag;
 }

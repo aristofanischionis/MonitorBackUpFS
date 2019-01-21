@@ -25,6 +25,7 @@ void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
         // link it in the list of inodes after creating it
         backupKid->data.inode = addINode(backupINodes, path);
         strcpy(backupKid->data.path, path);
+        backupKid->data.inode->modDate = sourceNode->kid->data.inode->modDate;
         // make copy pointer of source node point to backup
         sourceNode->kid->data.inode->copy = backupKid->data.inode;
         traverseTrees(sourceBase, backupTree, sourceINodes, backupINodes,
@@ -78,6 +79,7 @@ void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
         // link it in the list of inodes after creating it
         backupSibling->data.inode = addINode(backupINodes, path);
         strcpy(backupSibling->data.path, path);
+        backupSibling->data.inode->modDate = sourceNode->sibling->data.inode->modDate;
         // make copy pointer of source node point to backup
         sourceNode->sibling->data.inode->copy = backupSibling->data.inode;
         traverseTrees(sourceBase, backupTree, sourceINodes, backupINodes,
