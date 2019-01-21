@@ -94,6 +94,32 @@ TreeNode *searchByPath(TreeNode *node, char *path) {
     }
 }
 
+TreeNode *searchByINodeNum(TreeNode *node, int inodeNum, char *path) {
+    if (node == NULL) {
+        return NULL;
+    }
+    if (node->data.inode != NULL) {
+        if ((inodeNum == node->data.inode->inodeNum) && strcmp(path, node->data.path)) {
+            return node;
+        }   
+    }
+
+    TreeNode *nodeKid = NULL;
+    TreeNode *nodeSibling = NULL;
+    if (node->kid != NULL) {
+        nodeKid = searchByINodeNum(node->kid, inodeNum, path);
+    }
+    if (node->sibling != NULL) {
+        nodeSibling = searchByINodeNum(node->sibling, inodeNum, path);
+    }
+
+    if (nodeKid != NULL) {
+        return nodeKid;
+    } else {
+        return nodeSibling;
+    }
+}
+
 void deleteKids(TreeNode *node) {
     // if the node is null (e.g. if delete was called for kids but there are no
     // kids) then return
@@ -172,6 +198,6 @@ void printBranch(TreeNode *node, char *parentName) {
     if (node != NULL) {
         printBranch(node->kid, node->data.name);
         printBranch(node->sibling, parentName);
-        printf("%s in folder %s \n", node->data.name, parentName);
+        printf("%s in folder %s (%s)\n", node->data.name, parentName, node->data.path);
     }
 }

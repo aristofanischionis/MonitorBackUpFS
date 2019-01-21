@@ -13,7 +13,7 @@ extern char movedName[MAX];
 
 void createMode(struct inotify_event* event, int fd, char* path,
                 char* sourceBase, char* backup, List* sourceList, int* watched,
-                WDmapping** map) {
+                WDmapping** map, Tree *sourceTree) {
     INode* inode;
     char* backupTo;
     backupTo = malloc(MAX * sizeof(char));
@@ -25,19 +25,35 @@ void createMode(struct inotify_event* event, int fd, char* path,
     } else {
         char oldPath[MAX];
         char newPath[MAX];
+        char thisPath[2*MAX];
 
         // make paths
-        sprintf(oldPath, "%s/%s", path, event->name);
+        sprintf(oldPath, "%s/%s", path, event->name); // path of the new file
         sprintf(newPath, "%s/%s", backupTo, event->name);
+        printf("oldpath %s\n", oldPath);
+        printf("newpath %s\n", newPath);
+
         // check inode
         inode = searchForINodeByPath(sourceList, oldPath);
+       
         // if(inode == NULL) fail("Inode can't be retrieved properly\n");
         // ---- Haven't tested this if case yet only the else one
         // check if the copy already exists
-        if ((inode != NULL) && (inode->copy != NULL)) {
+        // && (inode->copy != NULL)
+        if ((inode != NULL)) {
             // there is a copy already (which means file created is a hardlink)
+            // find a path of a file that is hardlinked to the same inode (in source)
+            TreeNode *treeNodeHardlinked = searchByINodeNum(sourceTree->root, inode->inodeNum, oldPath);
+            if (treeNodeHardlinked == NULL) {
+                printf("is null\n");
+            }
+            char hardlinkedPath[MAX];
+            strcpy(hardlinkedPath, treeNodeHardlinked->data.path);
+            printf("hardlinked path %s\n", hardlinkedPath);
             // so link it
-            if (link(oldPath, newPath) == -1) {
+             //
+            sprintf(thisPath, "%s/%s", backupTo, inode->names->head->name); 
+            if (link(thisPath, newPath) == -1) {
                 printf(
                     " Failed to make a new hard link in -> %s, from -> %s \n",
                     newPath, oldPath);
@@ -48,7 +64,6 @@ void createMode(struct inotify_event* event, int fd, char* path,
             int fdNewFile;
             fdNewFile = open(newPath, O_WRONLY | O_CREAT, 0644);
             close(fdNewFile);
-            // add inode !!!!!
         }
     }
     free(backupTo);
@@ -73,7 +88,10 @@ void attribMode(struct inotify_event* event, char* path, char* sourceBase,
             exit(1);
         }
         printf(" ctime : %s\n", ctime(&statbuf.st_ctime));
-        inode = searchForINodeByPath(sourceList, fullPath);
+        char sourcePath[MAX];
+        sprintf(sourcePath, "%s/%s", path, event->name);
+        printf("path in attrib is %s\n", sourcePath);
+        inode = searchForINodeByPath(sourceList, sourcePath);
         if (inode == NULL) {
             perror(
                 "make sure that you have called add inode after file creation\n");
@@ -82,14 +100,16 @@ void attribMode(struct inotify_event* event, char* path, char* sourceBase,
         if (!inode->modDate) {
             perror("inode mod data is null\n");
         }
-        // update the replica
-        // update the moddate
-        inode->modDate = statbuf.st_ctime;
-        // // rm old file from backup
-        // remove(bPath);
-        // cp file from source to backup
-        // printf("i am attrib: %s, %s \n", fullPath, bPath);
-        copy(fullPath, bPath);
+        double seconds = difftime(statbuf.st_ctime, inode->modDate);
+        if (seconds > 0) {
+            // update the replica
+            // update the moddate
+            inode->modDate = statbuf.st_ctime;
+            // rm old file from backup
+            remove(bPath);
+            // cp file from source to backup
+            copy(fullPath, bPath);
+        }
     }
     free(bPath);
 }
@@ -224,7 +244,7 @@ void movedFromMode(struct inotify_event* event, char* path, char* sourceBase,
 // file moved inside the watched dir
 int movedToMode(struct inotify_event* event, int fd, char* path,
                  char* sourceBase, char* backup, List* sourceList, int* watched,
-                 WDmapping** map) {
+                 WDmapping** map, Tree *sourceTree) {
     char buf[MAX], buf1[MAX];
     char* bPath;
     char* sourcePath;
@@ -246,7 +266,7 @@ int movedToMode(struct inotify_event* event, int fd, char* path,
         flag = 1;
     } else {
         createMode(event, fd, path, sourceBase, backup, sourceList, watched,
-                   map);
+                   map, sourceTree);
         copy(sourcePath, bPath);
         flag = 2;
     }

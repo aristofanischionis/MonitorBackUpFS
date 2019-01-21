@@ -124,7 +124,7 @@ void handleEvents(int fd, char *backup, List *sourceList, List *backupList,
                     // just go to use Function
                     deleteName(&(inodeForMove->names), previousEventName);
                 }
-                // if the file was moved to an externar folder 
+                // if the file was moved to an external folder 
                 else {
                     deleteINode(&sourceList, inodeForMove->inodeNum, previousEventName);
                     traverseTrees((*sourceTree)->root->data.path, *backupTree,
@@ -200,7 +200,7 @@ void makeAction(struct inotify_event *event, int fd, char *path,
     else if (event->mask & IN_CREATE) {
         printf("\nCREATE %s : \n", event->name);
         createMode(event, fd, path, sourceBase, backup, sourceList, watched,
-                   map);
+                   map, *sourceTree);
         updateTreeCreate(eventPath, sourceTree, sourceList);
         traverseTrees((*sourceTree)->root->data.path, *backupTree, &sourceList,
                       &backupList, (*sourceTree)->root, (*backupTree)->root);
@@ -236,7 +236,7 @@ void makeAction(struct inotify_event *event, int fd, char *path,
     else if (event->mask & IN_MOVED_TO) {
         printf("\nMOVE TO %s : \n", event->name);
         int flag = movedToMode(event, fd, path, sourceBase, backup, sourceList, watched,
-                    map);
+                    map, *sourceTree);
         printf("flag isssssssssssssssss %d\n", flag);
         // if a file from the same hierarchy was moved
         if (flag == 1) {
