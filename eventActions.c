@@ -1,4 +1,5 @@
 #include "Headerfiles/eventActions.h"
+#include "Headerfiles/eventHandlers.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -226,14 +227,19 @@ void movedFromMode(struct inotify_event* event, char* path, char* sourceBase,
 int movedToMode(struct inotify_event* event, int fd, char* path,
                  char* sourceBase, char* backup, List* sourceList, int* watched,
                  WDmapping** map) {
-    char buf[MAX];
+    char buf[MAX], buf1[MAX];
     char* bPath;
+    char* sourcePath;
     // flag will be returned and it shows if a file was moved from an exterior folder or not
     int flag = 0;
     bPath = malloc(MAX * sizeof(char));
+    sourcePath = malloc(MAX * sizeof(char));
+    //
     bPath = formatBackupPath(sourceBase, backup, path);
     sprintf(bPath, "%s", realpath(bPath, buf));
     sprintf(bPath, "%s/%s", bPath, event->name);
+
+    sprintf(sourcePath,"%s/%s", realpath(path, buf1), event->name);
 
     if (cookieValue1 == event->cookie) {
         // it is in the same hierarchy
@@ -243,7 +249,7 @@ int movedToMode(struct inotify_event* event, int fd, char* path,
     } else {
         createMode(event, fd, path, sourceBase, backup, sourceList, watched,
                    map);
-        copy(movedName, bPath);
+        copy(sourcePath, bPath);
         flag = 2;
     }
     cookieValue1 = 0;
