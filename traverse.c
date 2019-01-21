@@ -92,10 +92,10 @@ void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
         traverseTrees(sourceBase, backupTree, sourceINodes, backupINodes,
                       sourceNode->sibling, backupSibling);
     } else if (siblingCase == FILE_IN_BACKUP) {
-        TreeNode *backupPrev = deleteNode(backupTree, backupNode->sibling);
         // unlink it in the list of inodes before deleting it from the tree
         deleteINode(backupINodes, backupNode->sibling->data.inode->inodeNum,
                     backupNode->sibling->data.name);
+        TreeNode *backupPrev = deleteNode(backupTree, backupNode->sibling);  
         traverseTrees(sourceBase, backupTree, sourceINodes, backupINodes,
                       sourceNode, backupPrev);
     } else if (siblingCase == DIR_IN_BACKUP) {
