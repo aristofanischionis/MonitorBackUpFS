@@ -59,7 +59,6 @@ void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
                 sourceNode->kid->data.inode->modDate;
             backupNode->kid->data.inode->size =
                 sourceNode->kid->data.inode->size;
-            backupNode->kid->data.inode->modified = 1;
         }
         traverseTrees(sourceBase, backupTree, sourceINodes, backupINodes,
                       sourceNode->kid, backupNode->kid);
@@ -114,7 +113,6 @@ void traverseTrees(char *sourceBase, Tree *backupTree, List **sourceINodes,
                 sourceNode->sibling->data.inode->modDate;
             backupNode->sibling->data.inode->size =
                 sourceNode->sibling->data.inode->size;
-            backupNode->sibling->data.inode->modified = 1;
         }
         traverseTrees(sourceBase, backupTree, sourceINodes, backupINodes,
                       sourceNode->sibling, backupNode->sibling);

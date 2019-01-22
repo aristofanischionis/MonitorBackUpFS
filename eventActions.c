@@ -30,8 +30,6 @@ void createMode(struct inotify_event* event, int fd, char* path,
         // make paths
         sprintf(oldPath, "%s/%s", path, event->name); // path of the new file
         sprintf(newPath, "%s/%s", backupTo, event->name);
-        printf("oldpath %s\n", oldPath);
-        printf("newpath %s\n", newPath);
 
         // check inode
         inode = searchForINodeByPath(sourceList, oldPath);
@@ -49,7 +47,6 @@ void createMode(struct inotify_event* event, int fd, char* path,
             }
             char hardlinkedPath[MAX];
             strcpy(hardlinkedPath, treeNodeHardlinked->data.path);
-            printf("hardlinked path %s\n", hardlinkedPath);
             // so link it
              //
             sprintf(thisPath, "%s/%s", backupTo, inode->names->head->name); 
@@ -87,10 +84,8 @@ void attribMode(struct inotify_event* event, char* path, char* sourceBase,
             perror(" Failed to get file status \n");
             exit(1);
         }
-        printf(" ctime : %s\n", ctime(&statbuf.st_ctime));
         char sourcePath[MAX];
         sprintf(sourcePath, "%s/%s", path, event->name);
-        printf("path in attrib is %s\n", sourcePath);
         inode = searchForINodeByPath(sourceList, sourcePath);
         if (inode == NULL) {
             perror(
@@ -149,7 +144,6 @@ void closeWriteMode(struct inotify_event* event, char* path, char* sourceBase,
 
     sprintf(bPath, "%s/%s", bPath, event->name);
     sprintf(fullPath, "%s/%s", realpath(path, buf), event->name);
-    printf("path is %s\n", bPath);
     if (!(event->mask & IN_ISDIR)) {
         // if it is a file
         inode = searchForINodeByPath(backupList, bPath);
@@ -157,16 +151,37 @@ void closeWriteMode(struct inotify_event* event, char* path, char* sourceBase,
             perror("inode is null\n");
             exit(1);
         }
-        // if it is marked as modified
+        // if it is marked as 
+        
         if (inode->modified == 1) {
-            // copy it
-            // rm old file from backup first
+            // If it is a hardlink copy only the contents of the source 
+            // file to backup file (so that inode doesn't change)
             sprintf(bPath, "%s", realpath(bPath, buf1));
-            remove(bPath);
-            // cp file from source to backup
-            copy(fullPath, bPath);
-            // it is not modified any more
-            inode->modified = 0;
+            if( inode->nameCount > 1){
+                printf("This is a hardlinked file in backup\n");
+                int childExitStatus;
+                pid_t pid;
+                int status;
+                
+                pid = fork();
+                if (pid == 0) {
+                    execl("/bin/sh/cat", "cat", fullPath, " >> ", bPath, NULL);
+                } else if (pid < 0) {
+                    perror("pid<0 in copy\n");
+                    exit(1);
+                } else {
+                    pid_t ws = waitpid(pid, &childExitStatus, WNOHANG);
+                    if (ws == -1) {
+                        perror("waitpid error in copy\n");
+                        exit(1);
+                    }
+                }
+            } else {   
+                // cp file from source to backup
+                copy(fullPath, bPath);
+                // it is not modified any more
+                inode->modified = 0;
+            }
         }
     }
     free(bPath);

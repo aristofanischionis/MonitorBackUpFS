@@ -237,7 +237,6 @@ void makeAction(struct inotify_event *event, int fd, char *path,
         printf("\nMOVE TO %s : \n", event->name);
         int flag = movedToMode(event, fd, path, sourceBase, backup, sourceList, watched,
                     map, *sourceTree);
-        printf("flag isssssssssssssssss %d\n", flag);
         // if a file from the same hierarchy was moved
         if (flag == 1) {
             updateTreeMoveToInsideHierarchy(eventPath, sourceTree, sourceList, inodeForMove);
